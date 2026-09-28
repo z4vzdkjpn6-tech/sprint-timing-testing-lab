@@ -107,22 +107,37 @@ if(state.history.height.length>5000)state.history.height.shift();
 if(state.history.speed.length>5000)state.history.speed.shift();
 function fmtPoint(q){return `(${q.x.toFixed(1)}, ${q.y.toFixed(1)})`}
 function drawLine(a,b,color,width=3,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
+function extendLine(a,b,d=4000){
+const dir=norm(sub(b,a));
+return{
+a:add(a,mul(dir,-d)),
+b:add(b,mul(dir,d))
+};
+}
 function drawPoint(q,color,r=6,label=''){ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(q.x,q.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();if(label&&state.overlays.labels){ctx.fillStyle='#132630';ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,q.x+8,q.y-8)}ctx.restore()}
 function drawVP(vp,color,label){if(!vp)return;ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(vp.x,vp.y,8,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,vp.x+10,vp.y-10);ctx.restore()}
 function drawGroundPlane(){
 
 for(let x=0;x<=1.0001;x+=0.1){
-    const a=homographyPoint(x,-20);
-    const b=homographyPoint(x,20);
-    if(a&&b&&isBelowHorizon(a)&&isBelowHorizon(b))
-    drawLine(a,b,'#ff0000',1);
+
+    const p0=homographyPoint(x,0);
+    const p1=homographyPoint(x,1);
+
+    const e=extendLine(p0,p1);
+
+    drawLine(e.a,e.b,'#ff0000',1);
+
 }
 
-for(let y=-20;y<=20;y+=0.5){
-    const a=homographyPoint(-2,y);
-    const b=homographyPoint(3,y);
-    if(a&&b&&isBelowHorizon(a)&&isBelowHorizon(b))
-    drawLine(a,b,'#0000ff',1);
+for(let y=0;y<=1.0001;y+=0.1){
+
+    const p0=homographyPoint(0,y);
+    const p1=homographyPoint(1,y);
+
+    const e=extendLine(p0,p1);
+
+    drawLine(e.a,e.b,'#0000ff',1);
+
 }
 
 }
