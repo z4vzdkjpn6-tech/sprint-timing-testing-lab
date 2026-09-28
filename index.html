@@ -84,14 +84,7 @@ const W=h[6]*x+h[7]*y+1;
 
 return p(X/W,Y/W);
 }
-function homographyPoint(x,y){
-const sa=state.geometry.sa,sb=state.geometry.sb,fa=state.geometry.fa,fb=state.geometry.fb;
 
-const p0=lerp(sa,sb,x);
-const p1=lerp(fa,fb,x);
-
-return lerp(p0,p1,y);
-}
 function crossAt(progress){const g=state.geometry;return{a:lerp(g.sa,g.fa,progress),b:lerp(g.sb,g.fb,progress)}}
 function corridorPoint(progress,lateral=.5){const c=crossAt(progress);return lerp(c.a,c.b,lateral)}
 function axis(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
