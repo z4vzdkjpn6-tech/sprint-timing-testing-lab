@@ -111,19 +111,19 @@ function drawPoint(q,color,r=6,label=''){ctx.save();ctx.fillStyle=color;ctx.stro
 function drawVP(vp,color,label){if(!vp)return;ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(vp.x,vp.y,8,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,vp.x+10,vp.y-10);ctx.restore()}
 function drawGroundPlane(){
 
-for(let y=0;y<=1.0001;y+=0.1){
+for(let x=0;x<=1.0001;x+=0.1){
 
-    const a=homographyPoint(0,y);
-    const b=homographyPoint(1,y);
+    const a=homographyPoint(x,0);
+    const b=homographyPoint(x,1);
 
     drawLine(a,b,'#ff0000',2);
 
 }
 
-for(let x=0;x<=1.0001;x+=0.1){
+for(let y=0;y<=1.0001;y+=0.1){
 
-    const a=homographyPoint(x,0);
-    const b=homographyPoint(x,1);
+    const a=homographyPoint(0,y);
+    const b=homographyPoint(1,y);
 
     drawLine(a,b,'#0000ff',2);
 
