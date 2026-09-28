@@ -107,36 +107,25 @@ if(state.history.height.length>5000)state.history.height.shift();
 if(state.history.speed.length>5000)state.history.speed.shift();
 function fmtPoint(q){return `(${q.x.toFixed(1)}, ${q.y.toFixed(1)})`}
 function drawLine(a,b,color,width=3,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
-function extendLine(a,b,d=4000){
-const dir=norm(sub(b,a));
-return{
-a:add(a,mul(dir,-d)),
-b:add(b,mul(dir,d))
-};
-}
 function drawPoint(q,color,r=6,label=''){ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(q.x,q.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();if(label&&state.overlays.labels){ctx.fillStyle='#132630';ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,q.x+8,q.y-8)}ctx.restore()}
 function drawVP(vp,color,label){if(!vp)return;ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(vp.x,vp.y,8,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,vp.x+10,vp.y-10);ctx.restore()}
 function drawGroundPlane(){
 
 for(let x=0;x<=1.0001;x+=0.1){
 
-    const p0=homographyPoint(x,0);
-    const p1=homographyPoint(x,1);
+    const a=homographyPoint(x,0);
+    const b=homographyPoint(x,1);
 
-    const e=extendLine(p0,p1);
-
-    drawLine(e.a,e.b,'#ff0000',1);
+    drawLine(a,b,'#ff0000',2);
 
 }
 
 for(let y=0;y<=1.0001;y+=0.1){
 
-    const p0=homographyPoint(0,y);
-    const p1=homographyPoint(1,y);
+    const a=homographyPoint(0,y);
+    const b=homographyPoint(1,y);
 
-    const e=extendLine(p0,p1);
-
-    drawLine(e.a,e.b,'#0000ff',1);
+    drawLine(a,b,'#0000ff',2);
 
 }
 
@@ -191,10 +180,6 @@ function canvasPos(e){const r=canvas.getBoundingClientRect();return p((e.clientX
 function corridorAxisPixels(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
 function corridorVP(){return lineIntersection(state.geometry.sa,state.geometry.fa,state.geometry.sb,state.geometry.fb)}
 function lineVP(){const s=state.geometry;return lineIntersection(s.sa,s.sb,s.fa,s.fb)}
-function isBelowHorizon(q){
-const cvp=corridorVP(),lvp=lineVP();
-return ((lvp.x-cvp.x)*(q.y-cvp.y)-(lvp.y-cvp.y)*(q.x-cvp.x))>0;
-}
 function perspectiveStrength(){const vp=corridorVP();if(!vp)return 0;const center=p(canvas.width/2,canvas.height/2);const d=Math.hypot(vp.x-center.x,vp.y-center.y);return +(10000/Math.max(d,1)).toFixed(2)}
 function lineLength(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function currentCrossWidth(progress){const c=crossAt(progress);return lineLength(c.a,c.b)}
