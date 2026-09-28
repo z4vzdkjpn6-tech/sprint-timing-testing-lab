@@ -112,21 +112,17 @@ function drawVP(vp,color,label){if(!vp)return;ctx.save();ctx.fillStyle=color;ctx
 function drawGroundPlane(){
 
 for(let x=0;x<=1.0001;x+=0.1){
-
-    const a=homographyPoint(x,0);
-    const b=homographyPoint(x,1);
-
-    drawLine(a,b,'#ff0000',2);
-
+    const a=homographyPoint(x,-20);
+    const b=homographyPoint(x,20);
+    if(a&&b&&isBelowHorizon(a)&&isBelowHorizon(b))
+    drawLine(a,b,'#ff0000',1);
 }
 
-for(let y=0;y<=1.0001;y+=0.1){
-
-    const a=homographyPoint(0,y);
-    const b=homographyPoint(1,y);
-
-    drawLine(a,b,'#0000ff',2);
-
+for(let y=-20;y<=20;y+=0.5){
+    const a=homographyPoint(-2,y);
+    const b=homographyPoint(3,y);
+    if(a&&b&&isBelowHorizon(a)&&isBelowHorizon(b))
+    drawLine(a,b,'#0000ff',1);
 }
 
 }
@@ -180,6 +176,10 @@ function canvasPos(e){const r=canvas.getBoundingClientRect();return p((e.clientX
 function corridorAxisPixels(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
 function corridorVP(){return lineIntersection(state.geometry.sa,state.geometry.fa,state.geometry.sb,state.geometry.fb)}
 function lineVP(){const s=state.geometry;return lineIntersection(s.sa,s.sb,s.fa,s.fb)}
+function isBelowHorizon(q){
+const cvp=corridorVP(),lvp=lineVP();
+return ((lvp.x-cvp.x)*(q.y-cvp.y)-(lvp.y-cvp.y)*(q.x-cvp.x))>0;
+}
 function perspectiveStrength(){const vp=corridorVP();if(!vp)return 0;const center=p(canvas.width/2,canvas.height/2);const d=Math.hypot(vp.x-center.x,vp.y-center.y);return +(10000/Math.max(d,1)).toFixed(2)}
 function lineLength(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function currentCrossWidth(progress){const c=crossAt(progress);return lineLength(c.a,c.b)}
