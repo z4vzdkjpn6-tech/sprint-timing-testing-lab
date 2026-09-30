@@ -100,7 +100,8 @@ function axis(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a)
 function project(point){const a=corridorPoint(0),b=corridorPoint(1),v=sub(b,a);return dot(sub(point,a),v)/Math.max(1,dot(v,v))}
 function apparentHeight(progress){const startWidth=len(sub(state.geometry.sb,state.geometry.sa)),now=len(sub(crossAt(progress).b,crossAt(progress).a));return 118*
        (state.runner.height/1.80)*
-       (.72+.28*now/startWidth)
+       (.72+.28*now/startWidth);
+}
 /* The simulated runner is one projected geometric object. Its contact point
    anchors pelvis, torso, chest and head; h is the already-projected apparent
    body height, so every body feature uses the same perspective scale. */
