@@ -107,7 +107,7 @@ function runnerModel(progress){
 
 const depthMeters=currentDepthMeters();
 
-const ground=corridorPoint(progress,.5),
+const ground=homographyPoint(progress,.5),
 dir=mul(axis(),state.runner.direction),
 h=apparentHeight(progress),
 lean=state.runner.lean*Math.PI/180;
