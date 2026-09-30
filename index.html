@@ -92,8 +92,13 @@ const W=h[6]*x+h[7]*y+1;
 return p(X/W,Y/W);
 }
 
-function crossAt(progress){const g=state.geometry;return{a:lerp(g.sa,g.fa,progress),b:lerp(g.sb,g.fb,progress)}}
-function corridorPoint(progress,lateral=.5){const c=crossAt(progress);return lerp(c.a,c.b,lateral)}
+function crossAt(progress){
+    return{
+        a:homographyPoint(progress,0),
+        b:homographyPoint(progress,1)
+    };
+}
+       function corridorPoint(progress,lateral=.5){const c=crossAt(progress);return lerp(c.a,c.b,lateral)}
 function axis(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
 function project(point){const a=corridorPoint(0),b=corridorPoint(1),v=sub(b,a);return dot(sub(point,a),v)/Math.max(1,dot(v,v))}
 function apparentHeight(progress){const startWidth=len(sub(state.geometry.sb,state.geometry.sa)),now=len(sub(crossAt(progress).b,crossAt(progress).a));return 118*
