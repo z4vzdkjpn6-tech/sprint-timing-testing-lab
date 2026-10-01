@@ -117,7 +117,7 @@ dir=mul(axis(),state.runner.direction),
 h=apparentHeight(progress),
 lean=state.runner.lean*Math.PI/180;
 
-const screenUp=heightDirection();
+const screenUp=p(0,-1);
 
 const torsoAxis=norm(add(screenUp,mul(dir,Math.tan(lean))));
 
@@ -301,22 +301,6 @@ function canvasPos(e){const r=canvas.getBoundingClientRect();return p((e.clientX
 function corridorAxisPixels(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
 function corridorVP(){return lineIntersection(state.geometry.sa,state.geometry.fa,state.geometry.sb,state.geometry.fb)}
 function lineVP(){const s=state.geometry;return lineIntersection(s.sa,s.sb,s.fa,s.fb)}
-function heightDirection(){
-
-    const cvp = corridorVP();
-    const lvp = lineVP();
-
-    if(!cvp || !lvp)
-        return p(0,-1);
-
-    const horizonDir = norm(sub(lvp,cvp));
-
-    return p(
-         horizonDir.y,
-        -horizonDir.x
-    );
-
-}
 function perspectiveStrength(){const vp=corridorVP();if(!vp)return 0;const center=p(canvas.width/2,canvas.height/2);const d=Math.hypot(vp.x-center.x,vp.y-center.y);return +(10000/Math.max(d,1)).toFixed(2)}
 function lineLength(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function currentCrossWidth(progress){const c=crossAt(progress);return lineLength(c.a,c.b)}
