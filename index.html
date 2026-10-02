@@ -110,7 +110,7 @@ function crossAt(progress){
         b:homographyPoint(progress,1)
     };
 }
-       function corridorPoint(progress,lateral=.5){const c=crossAt(progress);return lerp(c.a,c.b,lateral)}
+function corridorPoint(progress,lateral=.5){const c=crossAt(progress);return lerp(c.a,c.b,lateral)}
 function axis(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
 function project(point){const a=corridorPoint(0),b=corridorPoint(1),v=sub(b,a);return dot(sub(point,a),v)/Math.max(1,dot(v,v))}
 function projectWorldPoint(x,y,z){
@@ -118,6 +118,15 @@ function projectWorldPoint(x,y,z){
     return worldToGroundPlane(x,y);
 
 }
+function distance3(a,b){
+
+    const dx=a.x-b.x;
+    const dy=a.y-b.y;
+    const dz=a.z-b.z;
+
+    return Math.hypot(dx,dy,dz);
+
+}       
 function apparentHeight(progress){const startWidth=len(sub(state.geometry.sb,state.geometry.sa)),now=len(sub(crossAt(progress).b,crossAt(progress).a));return 118*
        (state.runner.height/1.80)*
        (.72+.28*now/startWidth);
@@ -134,8 +143,38 @@ const ground=
         state.runner.x,
         state.runner.y,
         state.runner.z
-    );
+);
 
+const foot3={
+    x:state.runner.x,
+    y:state.runner.y,
+    z:state.runner.z
+};
+
+const chest3={
+    x:state.runner.x,
+    y:state.runner.y,
+    z:state.runner.z+
+      state.runner.height*0.8
+};
+
+const head3={
+    x:state.runner.x,
+    y:state.runner.y,
+    z:state.runner.z+
+      state.runner.height
+};
+const camera3=state.camera;
+
+const cameraToFoot=
+    distance3(camera3*foot3);
+
+const cameraToChest=
+    distance3(camera3,chest3);
+
+const cameraToHead=
+    distance3(camera3,head3);
+       
 const dir=mul(axis(),state.runner.direction);
 
 const h=apparentHeight(progress);
@@ -174,6 +213,12 @@ truthCorrection,
 estimateCorrection,
 progress,
 depthMeters
+foot3,
+chest3,
+head3,
+cameraToFoot,
+cameraToChest,
+cameraToHead,
 };
 
 }
@@ -310,7 +355,14 @@ if(state.overlays.lineVP)drawVP(lvp,'#00a3ff','Line VP');if(state.overlays.horiz
 
                   const mid=homographyPoint(0.5,0.5);
 drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective()}
-function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s';$('frameV').textContent=state.sim.frame;$('progressV').textContent=(m.progress*100).toFixed(1)+'%';const trueDistance=m.depthMeters.toFixed(1);$('heightV').textContent=m.h.toFixed(1)+' px';const entries=[];if(state.overlays.algorithm)entries.push(['Estimated ground',fmtPoint(m.ground)],['Skeletal chest',fmtPoint(m.skeletal)],['Est. correction',fmtPoint(m.estimateCorrection)],['Front chest',fmtPoint(m.estimate)],['Corridor position',(project(m.estimate)*100).toFixed(2)+'%'],['Track length',state.sim.corridorLength.toFixed(1)+' m'],['Current distance',trueDistance+' m']);if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
+function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s';$('frameV').textContent=state.sim.frame;$('progressV').textContent=(m.progress*100).toFixed(1)+'%';const trueDistance=m.depthMeters.toFixed(1);$('heightV').textContent=m.h.toFixed(1)+' px';const entries=[];if(state.overlays.algorithm)entries.push(['Estimated ground',fmtPoint(m.ground)],['Skeletal chest',fmtPoint(m.skeletal)],['Est. correction',fmtPoint(m.estimateCorrection)],['Front chest',fmtPoint(m.estimate)],['Corridor position',(project(m.estimate)*100).toFixed(2)+'%'],['Track length',state.sim.corridorLength.toFixed(1)+' m'],['Current distance',trueDistance+' m'],['Cam → Fo*t',
+ m.cameratoFoot.toFixed(2)],
+
+['Cam → Chest',
+ m.cameraToChest.toFixed(2)],
+
+['Cam → Head',
+ m.cameraToHead.toFixed(2)]);if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
 function updatePerspective(){
 
     const vp=corridorVP(),
