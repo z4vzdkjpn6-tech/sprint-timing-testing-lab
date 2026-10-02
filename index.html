@@ -167,7 +167,7 @@ const head3={
 const camera3=state.camera;
 
 const cameraToFoot=
-    distance3(camera3*foot3);
+    distance3(camera3,foot3);
 
 const cameraToChest=
     distance3(camera3,chest3);
@@ -212,13 +212,13 @@ estimate:add(skeletal,estimateCorrection),
 truthCorrection,
 estimateCorrection,
 progress,
-depthMeters
+depthMeters,
 foot3,
 chest3,
 head3,
 cameraToFoot,
 cameraToChest,
-cameraToHead,
+cameraToHead
 };
 
 }
