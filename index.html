@@ -116,14 +116,16 @@ function runnerModel(progress){
 
 const depthMeters=currentDepthMeters();
 
-const ground=
-    worldToGroundPlane(
-        state.runner.x,
-        state.runner.y
-    );,
-dir=mul(axis(),state.runner.direction),
-h=apparentHeight(progress),
-lean=state.runner.lean*Math.PI/180;
+const ground=worldToGroundPlane(
+    state.runner.x,
+    state.runner.y
+);
+
+const dir=mul(axis(),state.runner.direction);
+
+const h=apparentHeight(progress);
+
+const lean=state.runner.lean*Math.PI/180;
 
 const screenUp=p(0,-1);
 
