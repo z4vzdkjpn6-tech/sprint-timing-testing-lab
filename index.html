@@ -32,8 +32,8 @@ const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:
     height:1.80,
     lean:12,
 
-    depth:0,
-    width:0.5,
+    x:0,
+    y:0.5,
 
     start:-.18,
     direction:1
@@ -116,7 +116,11 @@ function runnerModel(progress){
 
 const depthMeters=currentDepthMeters();
 
-const ground=homographyPoint(progress,.5),
+const ground=
+    worldToGroundPlane(
+        state.runner.x,
+        state.runner.y
+    );,
 dir=mul(axis(),state.runner.direction),
 h=apparentHeight(progress),
 lean=state.runner.lean*Math.PI/180;
@@ -160,16 +164,16 @@ depthMeters
 function lineCross(prev,now,line){const a=project(prev)-line,b=project(now)-line;if(a===0)return 0;if(a*b>0)return null;return clamp(Math.abs(a)/Math.max(.000001,Math.abs(a)+Math.abs(b)),0,1)}
 function crossingRecord(line,oldModel,model,oldTime,time){const e=lineCross(oldModel.estimate,model.estimate,line),t=lineCross(oldModel.truth,model.truth,line);if(e===null&&t===null)return null;const frac=e??t??1,at=oldTime+(time-oldTime)*frac, m=runnerModel(oldModel.progress+(model.progress-oldModel.progress)*frac);const truthTime=t===null?null:oldTime+(time-oldTime)*t;return{line:line===0?'start':'finish',estimatedTime:at,truthTime,errorMs:truthTime===null?null:Math.round((at-truthTime)*1000),frame:state.sim.frame,estimated:{ground:m.ground,skeletal:m.skeletal,front:m.estimate,correction:m.estimateCorrection,progress:project(m.estimate),height:m.h,lean:state.runner.lean,direction:m.dir},groundTruth:{front:m.truth,correction:m.truthCorrection},status:'confirmed by local temporal interpolation',window:state.samples.slice(-3)};}
 function resetResults(){state.results={start:null,finish:null};state.samples=[];state.history={height:[],speed:[]}}
-function resetSimulation(){state.runner.depth = 0;state.sim.time=0;state.sim.frame=0;state.sim.accum=0;state.sim.playing=false;resetResults();render()}
+function resetSimulation(){state.runner.x = 0;state.sim.time=0;state.sim.frame=0;state.sim.accum=0;state.sim.playing=false;resetResults();render()}
 function currentDepthMeters(){
-    return state.runner.depth;
+    return state.runner.x;
 }
 function currentProgress(){
 
     return state.runner.start +
            state.runner.direction *
            (
-             state.runner.depth /
+             state.runner.x /
              state.sim.corridorLength
            );
 
@@ -177,9 +181,9 @@ function currentProgress(){
 
 function setProgress(progress){
 
-    state.runner.depth =
-        (progress-state.runner.start) *
-        state.sim.corridorLength;
+    state.runner.x =
+    (progress-state.runner.start) *
+    state.sim.corridorLength;
 
 }
        
@@ -187,7 +191,7 @@ function advanceFrame(){console.log(
     "time=",state.sim.time,
     "progress=",currentProgress()
 );const oldTime=state.sim.time,oldProgress=currentProgress(),old=runnerModel(oldProgress);
-state.runner.depth +=
+state.runner.x +=
     state.runner.speed *
     (1/state.sim.fps);
 const progress=currentProgress(),model=runnerModel(progress);let speedPx=0;if(state.history.speed.length){const prev=state.history.speed[state.history.speed.length-1];speedPx=Math.hypot(model.ground.x-prev.x,model.ground.y-prev.y)}
@@ -199,6 +203,22 @@ function fmtPoint(q){return `(${q.x.toFixed(1)}, ${q.y.toFixed(1)})`}
 function drawLine(a,b,color,width=3,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
 function drawPoint(q,color,r=6,label=''){ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(q.x,q.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();if(label&&state.overlays.labels){ctx.fillStyle='#132630';ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,q.x+8,q.y-8)}ctx.restore()}
 function drawVP(vp,color,label){if(!vp)return;ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(vp.x,vp.y,8,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,vp.x+10,vp.y-10);ctx.restore()}
+function worldToGroundPlane(x,y){
+
+    return homographyPoint(
+
+        state.runner.start +
+        state.runner.direction *
+        (
+            x/state.sim.corridorLength
+        ),
+
+        y
+
+    );
+
+}
+       
 function drawGroundPlane(){
 
 for(let x=0;x<=1.0001;x+=0.1){
