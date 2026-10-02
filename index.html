@@ -35,6 +35,7 @@ const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:
 
     x:0,
     y:0.5,
+    z:0,
 
     start:-.18,
     direction:1
@@ -112,6 +113,11 @@ function crossAt(progress){
        function corridorPoint(progress,lateral=.5){const c=crossAt(progress);return lerp(c.a,c.b,lateral)}
 function axis(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a))}
 function project(point){const a=corridorPoint(0),b=corridorPoint(1),v=sub(b,a);return dot(sub(point,a),v)/Math.max(1,dot(v,v))}
+function projectWorldPoint(x,y,z){
+
+    return worldToGroundPlane(x,y);
+
+}
 function apparentHeight(progress){const startWidth=len(sub(state.geometry.sb,state.geometry.sa)),now=len(sub(crossAt(progress).b,crossAt(progress).a));return 118*
        (state.runner.height/1.80)*
        (.72+.28*now/startWidth);
@@ -123,10 +129,12 @@ function runnerModel(progress){
 
 const depthMeters=currentDepthMeters();
 
-const ground=worldToGroundPlane(
-    state.runner.x,
-    state.runner.y
-);
+const ground=
+    projectWorldPoint(
+        state.runner.x,
+        state.runner.y,
+        state.runner.z
+    );
 
 const dir=mul(axis(),state.runner.direction);
 
