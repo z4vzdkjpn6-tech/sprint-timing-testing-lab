@@ -27,7 +27,8 @@
 /* Coordinates are canvas pixels. Corridor progress is normalized: 0=start cross-section, 1=finish cross-section. */
 const $=id=>document.getElementById(id), canvas=$('scene'), ctx=canvas.getContext('2d');
 const overlayDefs=[['corridor','Show corridor'],['crossSection','Show corridor cross-section'],['ground','Show ground point'],['skeletal','Show skeletal chest point'],['estimate','Show estimated front-chest point'],['frontTruth','Show ground-truth front-chest point'],['direction','Show movement direction'],['markers','Show crossing markers'],['labels','Show labels'],['algorithm','Show algorithm values'],['groundTruth','Show ground-truth values'],['corridorVP','Show corridor VP'],['lineVP','Show line VP'],['horizon','Show horizon'],['groundPlane','Show homography grid']];
-const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:800,y:370}},runner:{
+const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:800,y:370}},
+             runner:{
     speed:8,
     height:1.80,
     lean:12,
@@ -37,7 +38,13 @@ const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:
 
     start:-.18,
     direction:1
-},sim:{fps:30,multiplier:1,time:0,frame:0,playing:false,accum:0,corridorLength:100},overlays:Object.fromEntries(overlayDefs.map(([k])=>[k,true])),results:{start:null,finish:null},samples:[],history:{height:[],speed:[]},drag:null,reportUrl:null,scrub:false,lastScrub:null};
+},
+             camera:{
+    x:-0.4,
+    y:1.3,
+    z:1.6
+},
+             sim:{fps:30,multiplier:1,time:0,frame:0,playing:false,accum:0,corridorLength:100},overlays:Object.fromEntries(overlayDefs.map(([k])=>[k,true])),results:{start:null,finish:null},samples:[],history:{height:[],speed:[]},drag:null,reportUrl:null,scrub:false,lastScrub:null};
 function p(x,y){return{x,y}}function add(a,b){return p(a.x+b.x,a.y+b.y)}function sub(a,b){return p(a.x-b.x,a.y-b.y)}function mul(a,k){return p(a.x*k,a.y*k)}function len(a){return Math.hypot(a.x,a.y)}function norm(a){const n=len(a)||1;return p(a.x/n,a.y/n)}function lerp(a,b,t){return p(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t)}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function dot(a,b){return a.x*b.x+a.y*b.y}
 function lineIntersection(a,b,c,d){const den=(a.x-b.x)*(c.y-d.y)-(a.y-b.y)*(c.x-d.x);if(Math.abs(den)<0.0001)return null;return p(((a.x*b.y-a.y*b.x)*(c.x-d.x)-(a.x-b.x)*(c.x*d.y-c.y*d.x))/den,((a.x*b.y-a.y*b.x)*(c.y-d.y)-(a.y-b.y)*(c.x*d.y-c.y*d.x))/den)}
 function computeHomography(){
@@ -221,6 +228,17 @@ function worldToGroundPlane(x,y){
 
 }
        
+function cameraGroundPoint(){
+
+    return worldToGroundPlane(
+        state.camera.x *
+        state.sim.corridorLength,
+
+        state.camera.y
+    );
+
+}
+       
 function drawGroundPlane(){
 
 for(let x=0;x<=1.0001;x+=0.1){
@@ -269,7 +287,16 @@ if(state.overlays.groundPlane)
 
 drawLine(g.sa,g.sb,'#13a55c',4);
 drawLine(g.fa,g.fb,'#e63d45',4);
-                  for(const [name,q,color] of [['Start A',g.sa,'#13a55c'],['Start B',g.sb,'#13a55c'],['Finish A',g.fa,'#e63d45'],['Finish B',g.fb,'#e63d45']])drawPoint(q,color,7,name);const progress=currentProgress(),m=runnerModel(progress);const cvp=corridorVP(),lvp=lineVP();
+                  for(const [name,q,color] of [['Start A',g.sa,'#13a55c'],['Start B',g.sb,'#13a55c'],['Finish A',g.fa,'#e63d45'],['Finish B',g.fb,'#e63d45']])drawPoint(q,color,7,name);const progress=currentProgress(),m=runnerModel(progress);
+const cam=cameraGroundPoint();
+
+drawPoint(
+    cam,
+    '#222222',
+    8,
+    'CAM'
+);
+const cvp=corridorVP(),lvp=lineVP();
 if(state.overlays.corridorVP)drawVP(cvp,'#ff0066','Corridor VP');
 if(state.overlays.lineVP)drawVP(lvp,'#00a3ff','Line VP');if(state.overlays.horizon&&cvp&&lvp){const dir=norm(sub(lvp,cvp));drawLine(add(cvp,mul(dir,-5000)),add(cvp,mul(dir,5000)),'#7a7a7a',2,[10,6])}if(state.overlays.crossSection){const c=crossAt(progress);drawLine(c.a,c.b,'#7b8790',2,[6,5])}drawRunner(m);if(state.overlays.ground)drawPoint(m.ground,'#25333c',6,'Ground/contact point');if(state.overlays.skeletal)drawPoint(m.skeletal,'#1976d2',6,'Skeletal chest point');if(state.overlays.estimate){drawLine(m.skeletal,m.estimate,'#ff9f0a',2,[3,3]);drawPoint(m.estimate,'#ff9f0a',7,'Estimated front chest')};if(state.overlays.frontTruth){drawLine(m.skeletal,m.truth,'#8e35c7',2,[3,3]);drawPoint(m.truth,'#8e35c7',6,'Ground truth front chest')};if(state.overlays.direction){ctx.save();ctx.strokeStyle='#182d39';ctx.lineWidth=3;const to=add(m.ground,mul(m.dir,54));ctx.beginPath();ctx.moveTo(m.ground.x,m.ground.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.fillStyle='#182d39';ctx.beginPath();ctx.arc(to.x,to.y,5,0,Math.PI*2);ctx.fill();ctx.restore()}if(state.overlays.markers)for(const rec of Object.values(state.results)){if(rec){drawPoint(rec.estimated.front,'#ff9f0a',9,`${rec.line} estimate`);drawPoint(rec.groundTruth.front,'#8e35c7',5,`${rec.line} truth`);}}
 
@@ -314,6 +341,9 @@ function updatePerspective(){
             : 'Parallel'
         ],
 
+        ['Camera X',state.camera.x.toFixed(2)],
+        ['Camera Y',state.camera.y.toFixed(2)],
+        ['Camera Z',state.camera.z.toFixed(2)+' m']
         ['Corridor→VP',vpDist],
         ['Start line px',startLen.toFixed(1)],
         ['Finish line px',finishLen.toFixed(1)],
