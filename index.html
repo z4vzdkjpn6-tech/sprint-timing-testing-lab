@@ -120,7 +120,7 @@ function projectWorldPoint(x,y,z){
 
     const d=distance3(state.camera,{x,y,z});
  
-    const lift=120*z/Math.max(d,.001);
+    const lift=600*z/Math.max(d,.001);
  
     return p(q.x,q.y-lift);
  
