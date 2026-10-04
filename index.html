@@ -253,7 +253,10 @@ function advanceFrame(){console.log(
     "time=",state.sim.time,
     "progress=",currentProgress()
 );const oldTime=state.sim.time,oldProgress=currentProgress(),old=runnerModel(oldProgress);
-state.runner.x +=
+    state.sim.time += 1/state.sim.fps;
+    state.sim.frame++;
+                        
+    state.runner.x +=
     state.runner.speed *
     (1/state.sim.fps);
 const progress=currentProgress(),model=runnerModel(progress);let speedPx=0;if(state.history.speed.length){const prev=state.history.speed[state.history.speed.length-1];speedPx=Math.hypot(model.ground.x-prev.x,model.ground.y-prev.y)}
@@ -284,8 +287,7 @@ function worldToGroundPlane(x,y){
 function cameraGroundPoint(){
 
     return worldToGroundPlane(
-        state.camera.x *
-        state.sim.corridorLength,
+        state.camera.x,
 
         state.camera.y
     );
