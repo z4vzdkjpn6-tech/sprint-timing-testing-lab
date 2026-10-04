@@ -197,6 +197,9 @@ const ground=
         state.runner.y,
         state.runner.z
 );
+const foot3=runnerFootPoint();
+const chest3=runnerChestPoint();
+const head3=runnerHeadPoint();
 
 const chestProjected=
     projectWorldPoint(
@@ -212,9 +215,7 @@ const headProjected=
         head3.z
     );
        
-const foot3=runnerFootPoint();
-const chest3=runnerChestPoint();
-const head3=runnerHeadPoint();
+
        
 const camera3=state.camera;
 
