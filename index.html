@@ -125,7 +125,42 @@ function distance3(a,b){
 
     return Math.hypot(dx,dy,dz);
 
-}       
+}
+       
+function runnerFootPoint(){
+    return{
+        x:state.runner.x,
+        y:state.runner.y,
+        z:state.runner.z
+    };
+}
+
+function runnerChestPoint(){
+    return{
+        x:state.runner.x,
+        y:state.runner.y,
+        z:state.runner.z+
+          state.runner.height*0.8
+    };
+}
+
+function runnerHeadPoint(){
+    return{
+        x:state.runner.x,
+        y:state.runner.y,
+        z:state.runner.z+
+          state.runner.height
+    };
+}
+
+function cameraDistanceToRunner(){
+
+    return distance3(
+        state.camera,
+        runnerFootPoint()
+    );
+
+}
 function apparentHeight(progress){const startWidth=len(sub(state.geometry.sb,state.geometry.sa)),now=len(sub(crossAt(progress).b,crossAt(progress).a));return 118*
        (state.runner.height/1.80)*
        (.72+.28*now/startWidth);
@@ -144,24 +179,10 @@ const ground=
         state.runner.z
 );
 
-const foot3={
-    x:state.runner.x,
-    y:state.runner.y,
-    z:state.runner.z
-};
-
-const chest3={
-    x:state.runner.x,
-    y:state.runner.y,
-    z:state.runner.z+
-      state.runner.height*0.8
-};
-
-const head3={
-    x:state.runner.x,
-    y:state.runner.y,
-    z:state.runner.z+
-      state.runner.height
+const foot3=runnerFootPoint();
+const chest3=runnerChestPoint();
+const head3=runnerHeadPoint();
+       
 };
 const camera3=state.camera;
 
@@ -355,6 +376,9 @@ if(state.overlays.lineVP)drawVP(lvp,'#00a3ff','Line VP');if(state.overlays.horiz
                   const mid=homographyPoint(0.5,0.5);
 drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective()}
 function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s';$('frameV').textContent=state.sim.frame;$('progressV').textContent=(m.progress*100).toFixed(1)+'%';const trueDistance=state.runner.x.toFixed(1);$('heightV').textContent=m.h.toFixed(1)+' px';const entries=[];if(state.overlays.algorithm)entries.push(['Estimated ground',fmtPoint(m.ground)],['Skeletal chest',fmtPoint(m.skeletal)],['Est. correction',fmtPoint(m.estimateCorrection)],['Front chest',fmtPoint(m.estimate)],['Corridor position',(currentProgress()*100).toFixed(2)+'%'],['Track length',state.sim.corridorLength.toFixed(1)+' m'],['Current distance',trueDistance+' m'],
+['Cam → Runner',
+ cameraDistanceToRunner().toFixed(2)+' m'],
+                                                                                                                                                                                                                                                                                                                                         
 ['Cam → Foot',
  m.cameraToFoot.toFixed(2)],
 
