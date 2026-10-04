@@ -114,9 +114,28 @@ function axis(){const a=corridorPoint(0),b=corridorPoint(1);return norm(sub(b,a)
 function project(point){const a=corridorPoint(0),b=corridorPoint(1),v=sub(b,a);return dot(sub(point,a),v)/Math.max(1,dot(v,v))}
 function projectWorldPoint(x,y,z){
 
-    return worldToGroundPlane(x,y);
+    const q=worldToGroundPlane(x,y);
+
+    const cam=state.camera;
+
+    const d=Math.max(
+        .001,
+        Math.hypot(
+            x-cam.x,
+            y-cam.y
+        )
+    );
+
+    const lift=
+        (z*120)/d;
+
+    return p(
+        q.x,
+        q.y-lift
+    );
 
 }
+       
 function distance3(a,b){
 
     const dx=a.x-b.x;
@@ -179,6 +198,20 @@ const ground=
         state.runner.z
 );
 
+const chestProjected=
+    projectWorldPoint(
+        chest3.x,
+        chest3.y,
+        chest3.z
+    );
+
+const headProjected=
+    projectWorldPoint(
+        head3.x,
+        head3.y,
+        head3.z
+    );
+       
 const foot3=runnerFootPoint();
 const chest3=runnerChestPoint();
 const head3=runnerHeadPoint();
@@ -235,6 +268,8 @@ depthMeters,
 foot3,
 chest3,
 head3,
+chestProjected,
+headProjected,
 cameraToFoot,
 cameraToChest,
 cameraToHead
@@ -382,7 +417,7 @@ function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s'
  m.cameraToFoot.toFixed(2)],
 
 ['Cam → Chest',
- m.cameraToChest.toFixed(2)],
+ m.cameraToChest.toFixed(2)+' m'],
 
 ['Cam → Head',
  m.cameraToHead.toFixed(2)]);if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
