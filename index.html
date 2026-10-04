@@ -278,7 +278,7 @@ function advanceFrame(){console.log(
     state.runner.x +=
     state.runner.speed *
     (1/state.sim.fps);
-const progress=currentProgress(),model=runnerModel(progress);let speedPx=0;if(state.history.speed.length){const prev=state.history.speed[state.history.speed.length-1];speedPx=Math.hypot(model.ground.x-prev.x,model.ground.y-prev.y)}
+const progress=currentProgress(),model=runnerModel(progress);
 state.samples.push({frame:state.sim.frame,time:state.sim.time,progress,estimate:model.estimate,truth:model.truth});if(state.samples.length>7)state.samples.shift();for(const [key,line] of [['start',0],['finish',1]])if(!state.results[key]){const rec=crossingRecord(line,old,model,oldTime,state.sim.time);if(rec)state.results[key]=rec}if(progress>1.35||progress<-.35){state.sim.playing=false}render()}
 
 function fmtPoint(q){return `(${q.x.toFixed(1)}, ${q.y.toFixed(1)})`}
