@@ -1,7 +1,43 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Sprint Timing Testing Laboratory — V1</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#162027;background:#edf1f4}*{box-sizing:border-box}body{margin:0}main{max-width:1240px;margin:auto;padding:16px}h1{font-size:25px;margin:4px 0 8px}h2{font-size:16px;margin:0 0 10px}.sub,.muted{color:#5f6b76;font-size:13px;line-height:1.4}.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px 280px;gap:14px;align-items:start}.card{background:#fff;border:1px solid #dce3e8;border-radius:15px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px #00000009}canvas{width:100%;height:auto;display:block;border-radius:11px;background:#e7edf0;touch-action:none}.toolbar,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar{margin:10px 0 0}button,select,input{font:inherit}button{background:#193c56;color:white;border:0;border-radius:9px;padding:9px 11px;font-weight:650}button.secondary{background:#e8eef2;color:#183448}button:disabled{opacity:.45}label.control{display:flex;justify-content:space-between;gap:8px;align-items:center;border-top:1px solid #edf0f2;padding:7px 0;font-size:13px}input[type=range]{width:130px}.toggles{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;font-size:12px}.toggles label{display:flex;gap:5px;align-items:center}.value{font-variant-numeric:tabular-nums;color:#174764;min-width:48px;text-align:right}.readout{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px}.readout div{background:#f5f8fa;border-radius:8px;padding:7px}.readout b{display:block;color:#62707b;font-size:10px;text-transform:uppercase;letter-spacing:.04em}.summary{white-space:pre-wrap;background:#102a3a;color:#e9f6fa;border-radius:10px;padding:11px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;min-height:102px}.pass{color:#07823b}.review{color:#bc7600}.fail{color:#c33131}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin:8px 0}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}@media(max-width:860px){.layout{grid-template-columns:1fr}main{padding:10px}.card{padding:12px}}
+:root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:#162027;background:#edf1f4}*{box-sizing:border-box}body{margin:0}main{max-width:1240px;margin:auto;padding:16px}h1{font-size:25px;margin:4px 0 8px}h2{font-size:16px;margin:0 0 10px}.sub,.muted{color:#5f6b76;font-size:13px;line-height:1.4}.layout{display:grid;grid-template-columns:minmax(0,1fr) 280px 280px;gap:14px;align-items:start}.card{background:#fff;border:1px solid #dce3e8;border-radius:15px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px #00000009}canvas{width:100%;height:auto;display:block;border-radius:11px;background:#e7edf0;touch-action:none}.toolbar,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar{margin:10px 0 0}button,select,input{font:inherit}button{background:#193c56;color:white;border:0;border-radius:9px;padding:9px 11px;font-weight:650}button.secondary{background:#e8eef2;color:#183448}button:disabled{opacity:.45}label.control{display:flex;justify-content:space-between;gap:8px;align-items:center;border-top:1px solid #edf0f2;padding:7px 0;font-size:13px}input[type=range]{width:130px}.toggles{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;font-size:12px}.toggles label{display:flex;gap:5px;align-items:center}.value{font-variant-numeric:tabular-nums;color:#174764;min-width:48px;text-align:right}.readout{display:grid;grid-template-columns:1fr 1fr;gap:7px;font-size:12px}.readout div{background:#f5f8fa;border-radius:8px;padding:7px}.readout b{display:block;color:#62707b;font-size:10px;text-transform:uppercase;letter-spacing:.04em}.summary{white-space:pre-wrap;background:#102a3a;color:#e9f6fa;border-radius:10px;padding:11px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;min-height:102px}.pass{color:#07823b}.review{color:#bc7600}.fail{color:#c33131}.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin:8px 0}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}@media(max-width:860px){.layout{grid-template-columns:1fr}main{padding:10px}.card{padding:12px}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+.cameraRow{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin:6px 0;
+
+}
+
+.cameraRow span:first-child{
+
+    width:45px;
+
+    font-weight:600;
+
+}
+
+.cameraRow input{
+
+    flex:1;
+
+}
+
+.cameraRow span:last-child{
+
+    width:50px;
+
+    text-align:right;
+
+}
+}
+
 </style></head><body><main>
 <h1>Sprint Timing Testing Laboratory <span class="muted">V1</span></h1><div class="sub">A deterministic, local visual laboratory for corridor geometry, chest-point correction, line-crossing timing, and diagnostic reports.</div>
 <div class="layout"><section id="leftColumn">
@@ -11,8 +47,8 @@
 <div class="card">
     <h2>3D Camera</h2>
 
-    <label>
-        Yaw
+    <div class="cameraRow">
+        <span>Yaw</span>
         <input id="yaw"
                type="range"
                min="-180"
@@ -20,10 +56,10 @@
                step="1"
                value="0">
         <span id="yawV">0°</span>
-    </label>
+    </div>
 
-    <label>
-        Pitch
+    <div class="cameraRow">
+        <span>Pitch</span>
         <input id="pitch"
                type="range"
                min="-90"
@@ -31,10 +67,10 @@
                step="1"
                value="0">
         <span id="pitchV">0°</span>
-    </label>
+    </div>
 
-    <label>
-        Roll
+    <div class="cameraRow">
+        <span>Roll</span>
         <input id="roll"
                type="range"
                min="-180"
@@ -42,10 +78,10 @@
                step="1"
                value="0">
         <span id="rollV">0°</span>
-    </label>
+    </div>
 
-    <label>
-        Focal
+    <div class="cameraRow">
+        <span>Focal</span>
         <input id="focal"
                type="range"
                min="100"
@@ -53,8 +89,7 @@
                step="10"
                value="800">
         <span id="focalV">800</span>
-    </label>
-
+    </div>
 </div>
 <div class="card"><h2>Simulation</h2><label class="control">Simulation speed <input id="simSpeed" type="range" min="0.25" max="4" step="0.25"><span id="simSpeedV" class="value"></span></label><label class="control">Frame rate <select id="fps"><option value="24">24 fps</option><option value="30" selected>30 fps</option><option value="60">60 fps</option></select></label><label class="control">Track length <input id="corridorLength" type="range" min="10" max="150" step="1"><span id="corridorLengthV" class="value"></span></label><label class="control">Corridor position <input id="manualPosition" type="range" min="-0.35" max="1.35" step="0.01"><span id="manualPositionV" class="value"></span></label><div class="readout"><div><b>Simulation time</b><span id="timeV"></span></div><div><b>Frame</b><span id="frameV"></span></div><div><b>Corridor position</b><span id="progressV"></span></div><div><b>Apparent height</b><span id="heightV"></span></div></div></div>
 <div class="card"><h2>Runner</h2><label class="control">Speed <input id="runnerSpeed" type="range" min="3" max="13" step="0.1"><span id="runnerSpeedV" class="value"></span></label><label class="control">Sprinter Height <input id="height" type="range"
