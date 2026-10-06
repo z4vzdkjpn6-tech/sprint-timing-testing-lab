@@ -8,6 +8,54 @@
 <div class="card"><canvas id="scene" width="960" height="540" aria-label="Sprint timing test scene"></canvas><div class="legend"><span><i class="dot" style="background:#12a75c"></i>Start</span><span><i class="dot" style="background:#e63d45"></i>Finish</span><span><i class="dot" style="background:#1976d2"></i>Skeletal chest</span><span><i class="dot" style="background:#ff9f0a"></i>Estimated front chest</span><span><i class="dot" style="background:#8e35c7"></i>Ground-truth front chest</span></div><div class="toolbar"><button id="play">Play</button><button id="pause" class="secondary">Pause</button><button id="restart" class="secondary">Restart</button><button id="back" class="secondary">◀ Frame</button><button id="step" class="secondary">Frame ▶</button><button id="runTest">Run test</button><button id="export" class="secondary">Export report</button></div></div>
 <div class="card"><h2>Crossing diagnostic</h2><div id="summary" class="summary">Enjoy.</div></div>
 </section><aside id="centerColumn">
+<div class="card">
+    <h2>3D Camera</h2>
+
+    <label>
+        Yaw
+        <input id="yaw"
+               type="range"
+               min="-180"
+               max="180"
+               step="1"
+               value="0">
+        <span id="yawV">0°</span>
+    </label>
+
+    <label>
+        Pitch
+        <input id="pitch"
+               type="range"
+               min="-90"
+               max="90"
+               step="1"
+               value="0">
+        <span id="pitchV">0°</span>
+    </label>
+
+    <label>
+        Roll
+        <input id="roll"
+               type="range"
+               min="-180"
+               max="180"
+               step="1"
+               value="0">
+        <span id="rollV">0°</span>
+    </label>
+
+    <label>
+        Focal
+        <input id="focal"
+               type="range"
+               min="100"
+               max="3000"
+               step="10"
+               value="800">
+        <span id="focalV">800</span>
+    </label>
+
+</div>
 <div class="card"><h2>Simulation</h2><label class="control">Simulation speed <input id="simSpeed" type="range" min="0.25" max="4" step="0.25"><span id="simSpeedV" class="value"></span></label><label class="control">Frame rate <select id="fps"><option value="24">24 fps</option><option value="30" selected>30 fps</option><option value="60">60 fps</option></select></label><label class="control">Track length <input id="corridorLength" type="range" min="10" max="150" step="1"><span id="corridorLengthV" class="value"></span></label><label class="control">Corridor position <input id="manualPosition" type="range" min="-0.35" max="1.35" step="0.01"><span id="manualPositionV" class="value"></span></label><div class="readout"><div><b>Simulation time</b><span id="timeV"></span></div><div><b>Frame</b><span id="frameV"></span></div><div><b>Corridor position</b><span id="progressV"></span></div><div><b>Apparent height</b><span id="heightV"></span></div></div></div>
 <div class="card"><h2>Runner</h2><label class="control">Speed <input id="runnerSpeed" type="range" min="3" max="13" step="0.1"><span id="runnerSpeedV" class="value"></span></label><label class="control">Sprinter Height <input id="height" type="range"
        min="1.50"
@@ -390,6 +438,24 @@ headCameraProjected
 
 }
 
+
+$('yaw').value=state.camera.yaw;
+$('yawV').textContent=
+    state.camera.yaw+'°';
+
+$('pitch').value=state.camera.pitch;
+$('pitchV').textContent=
+    state.camera.pitch+'°';
+
+$('roll').value=state.camera.roll;
+$('rollV').textContent=
+    state.camera.roll+'°';
+
+$('focal').value=state.camera.focal;
+$('focalV').textContent=
+    state.camera.focal;
+       
+       
 function lineCross(prev,now,line){const a=project(prev)-line,b=project(now)-line;if(a===0)return 0;if(a*b>0)return null;return clamp(Math.abs(a)/Math.max(.000001,Math.abs(a)+Math.abs(b)),0,1)}
 function crossingRecord(line,oldModel,model,oldTime,time){const e=lineCross(oldModel.estimate,model.estimate,line),t=lineCross(oldModel.truth,model.truth,line);if(e===null&&t===null)return null;const frac=e??t??1,at=oldTime+(time-oldTime)*frac, m=runnerModel(oldModel.progress+(model.progress-oldModel.progress)*frac);const truthTime=t===null?null:oldTime+(time-oldTime)*t;return{line:line===0?'start':'finish',estimatedTime:at,truthTime,errorMs:truthTime===null?null:Math.round((at-truthTime)*1000),frame:state.sim.frame,estimated:{ground:m.ground,skeletal:m.skeletal,front:m.estimate,correction:m.estimateCorrection,progress:project(m.estimate),height:m.h,lean:state.runner.lean,direction:m.dir},groundTruth:{front:m.truth,correction:m.truthCorrection},status:'confirmed by local temporal interpolation',window:state.samples.slice(-3)};}
 function resetResults(){state.results={start:null,finish:null};state.samples=[]}
@@ -608,6 +674,9 @@ function updatePerspective(){
         ['Camera Y',state.camera.y.toFixed(2)],
         ['Camera Z',state.camera.z.toFixed(2)+' m'],
         ['Yaw',state.camera.yaw.toFixed(1)+'°'],
+        ['Pitch',state.camera.pitch.toFixed(1)+'°'],
+        ['Roll',state.camera.roll.toFixed(1)+'°'],
+        ['Focal',state.camera.focal.toFixed(0)],
         ['Corridor→VP',vpDist],
         ['Start line px',startLen.toFixed(1)],
         ['Finish line px',finishLen.toFixed(1)],
@@ -636,7 +705,11 @@ function lineVP(){const s=state.geometry;return lineIntersection(s.sa,s.sb,s.fa,
 function perspectiveStrength(){const vp=corridorVP();if(!vp)return 0;const center=p(canvas.width/2,canvas.height/2);const d=Math.hypot(vp.x-center.x,vp.y-center.y);return +(10000/Math.max(d,1)).toFixed(2)}
 function lineLength(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function currentCrossWidth(progress){const c=crossAt(progress);return lineLength(c.a,c.b)}
-canvas.addEventListener('pointerdown',e=>{if(e.ctrlKey){state.scrub=true;state.lastScrub=canvasPos(e);canvas.setPointerCapture(e.pointerId);return;}
+
+// ====================================================
+// EVENT LISTENERS
+// ====================================================
+       canvas.addEventListener('pointerdown',e=>{if(e.ctrlKey){state.scrub=true;state.lastScrub=canvasPos(e);canvas.setPointerCapture(e.pointerId);return;}
 const q=canvasPos(e);let best=null,d=22;for(const [name,key] of Object.entries({"Start A":'sa',"Start B":'sb',"Finish A":'fa',"Finish B":'fb'})){const z=state.geometry[key],dist=Math.hypot(q.x-z.x,q.y-z.y);if(dist<d){best={name,key};d=dist}}if(best){state.drag=best}else return;;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(state.scrub){const now=canvasPos(e);const delta=sub(now,state.lastScrub);const axisV=corridorAxisPixels();const movement=dot(delta,axisV);const current=currentProgress();const next=clamp(current+movement/500,-0.35,1.35);setProgress(next);state.lastScrub=now;syncControls();render();return;}
 if(!state.drag)return;const q=canvasPos(e);state.geometry[state.drag.key]=p(clamp(q.x,25,935),clamp(q.y,25,515));resetResults();render()});canvas.addEventListener('pointerup',()=>{state.drag=null;state.scrub=false;state.lastScrub=null;});
 overlayDefs.forEach(([k,label])=>{$('toggles').insertAdjacentHTML('beforeend',`<label><input type="checkbox" data-overlay="${k}" checked> ${label}</label>`)});$('toggles').onchange=e=>{if(e.target.dataset.overlay){state.overlays[e.target.dataset.overlay]=e.target.checked;render()}};
@@ -646,6 +719,47 @@ overlayDefs.forEach(([k,label])=>{$('toggles').insertAdjacentHTML('beforeend',`<
  ['startPos','start'],
  ['simSpeed',null]].forEach(([id,key])=>$(id).oninput=()=>{if(key){state.runner[key]=+$(id).value;resetResults()}else state.sim.multiplier=+$(id).value;syncControls();render()});$('fps').onchange=()=>{state.sim.fps=+$('fps').value;resetResults();render()};$('corridorLength').oninput=()=>{state.sim.corridorLength=+$('corridorLength').value;syncControls();render()};$('manualPosition').oninput=()=>{setProgress(+$('manualPosition').value);syncControls();render()};
 $('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetSimulation()};$('play').onclick=()=>state.sim.playing=true;$('pause').onclick=()=>state.sim.playing=false;$('restart').onclick=resetSimulation;$('step').onclick=advanceFrame;$('back').onclick=()=>{state.sim.time=Math.max(0,state.sim.time-1/state.sim.fps);state.sim.frame=Math.max(0,state.sim.frame-1);resetResults();render()};$('runTest').onclick=runTest;$('export').onclick=exportReport;
+     
+       $('yaw').addEventListener('input',e=>{
+    state.camera.yaw=+e.target.value;
+
+    $('yawV').textContent=state.camera.yaw.toFixed(0)+'°';
+       
+    render();
+
+});
+       $('pitch').addEventListener('input',e=>{
+    state.camera.pitch=
+           +e.target.value;
+
+    $('pitchV').textContent=
+        state.camera.pitch.toFixed(0)+'°';
+
+    render();
+
+});
+       $('roll').addEventListener('input',e=>{
+
+    state.camera.roll=
+           +e.target.value;
+
+    $('rollV').textContent=
+        state.camera.roll.toFixed(0)+'°';
+
+    render();
+
+});
+       $('focal').addEventListener('input',e=>{
+
+    state.camera.focal=
+        +e.target.value;
+
+    $('focalV').textContent=
+        state.camera.focal.toFixed(0);
+
+    render();
+
+});
 let last=performance.now();
 function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(state.sim.playing){state.sim.accum+=dt*state.sim.multiplier;const interval=1/state.sim.fps;let n=0;while(state.sim.accum>=interval&&n++<4){advanceFrame();state.sim.accum-=interval}}requestAnimationFrame(loop)}syncControls();render();requestAnimationFrame(loop);
 </script></body></html>
