@@ -729,33 +729,27 @@ $('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetS
 
 });
        $('pitch').addEventListener('input',e=>{
-    state.camera.pitch=
-           +e.target.value;
+    state.camera.pitch=+e.target.value;
 
-    $('pitchV').textContent=
-        state.camera.pitch.toFixed(0)+'°';
+    $('pitchV').textContent=state.camera.pitch.toFixed(0)+'°';
 
     render();
 
 });
        $('roll').addEventListener('input',e=>{
 
-    state.camera.roll=
-           +e.target.value;
+    state.camera.roll=+e.target.value;
 
-    $('rollV').textContent=
-        state.camera.roll.toFixed(0)+'°';
+    $('rollV').textContent=state.camera.roll.toFixed(0)+'°';
 
     render();
 
 });
        $('focal').addEventListener('input',e=>{
 
-    state.camera.focal=
-        +e.target.value;
+    state.camera.focal=+e.target.value;
 
-    $('focalV').textContent=
-        state.camera.focal.toFixed(0);
+    $('focalV').textContent=state.camera.focal.toFixed(0);
 
     render();
 
