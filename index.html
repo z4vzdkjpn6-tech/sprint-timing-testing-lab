@@ -207,6 +207,18 @@ function cameraPoint(){
     );
 
 }
+
+function worldToCamera(point){
+
+    const cam=cameraPoint();
+
+    return point3(
+        point.x-cam.x,
+        point.y-cam.y,
+        point.z-cam.z
+    );
+
+}       
        
 function cameraDistanceToRunner(){
 
@@ -237,6 +249,15 @@ const foot3=runnerFootPoint();
 const chest3=runnerChestPoint();
 const head3=runnerHeadPoint();
 
+const footCam=
+    worldToCamera(foot3);
+
+const chestCam=
+    worldToCamera(chest3);
+
+const headCam=
+    worldToCamera(head3);
+       
 const chestProjected=
     projectPoint3(chest3);
 
@@ -300,7 +321,10 @@ chestProjected,
 headProjected,
 cameraToFoot,
 cameraToChest,
-cameraToHead
+cameraToHead,
+footCam,
+chestCam,
+headCam
 };
 
 }
@@ -455,7 +479,18 @@ function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s'
  m.cameraToChest.toFixed(2)+' m'],
 
 ['Cam → Head',
- m.cameraToHead.toFixed(2)]);if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
+ m.cameraToHead.toFixed(2)]),
+       
+['FootCam Z',
+ m.footCam.z.toFixed(2)],
+
+['ChestCam Z',
+ m.chestCam.z.toFixed(2)],
+
+['HeadCam Z',
+ m.headCam.z.toFixed(2)]
+       ;if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
+
 function updatePerspective(){
 
     const vp=corridorVP(),
