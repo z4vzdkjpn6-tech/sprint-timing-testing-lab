@@ -479,7 +479,7 @@ function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s'
  m.cameraToChest.toFixed(2)+' m'],
 
 ['Cam → Head',
- m.cameraToHead.toFixed(2)]),
+ m.cameraToHead.toFixed(2)],
        
 ['FootCam Z',
  m.footCam.z.toFixed(2)],
@@ -489,7 +489,7 @@ function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s'
 
 ['HeadCam Z',
  m.headCam.z.toFixed(2)]
-       ;if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
+       );if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
 
 function updatePerspective(){
 
