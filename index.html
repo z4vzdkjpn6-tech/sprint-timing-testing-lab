@@ -139,6 +139,24 @@ projection:{
     focal:800
 },
              sim:{fps:30,multiplier:1,time:0,frame:0,playing:false,accum:0,corridorLength:100},overlays:Object.fromEntries(overlayDefs.map(([k])=>[k,true])),results:{start:null,finish:null},samples:[],drag:null,reportUrl:null,scrub:false,lastScrub:null};
+
+  
+function worldAxes(){
+
+    return {
+
+        origin: point3(0,0,0),
+
+        x: point3(100,0,0),
+
+        y: point3(0,100,0),
+
+        z: point3(0,0,100)
+
+    };
+
+}
+
 function p(x,y){return{x,y}}function add(a,b){return p(a.x+b.x,a.y+b.y)}function sub(a,b){return p(a.x-b.x,a.y-b.y)}function mul(a,k){return p(a.x*k,a.y*k)}function len(a){return Math.hypot(a.x,a.y)}function norm(a){const n=len(a)||1;return p(a.x/n,a.y/n)}function lerp(a,b,t){return p(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t)}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function dot(a,b){return a.x*b.x+a.y*b.y}
 function lineIntersection(a,b,c,d){const den=(a.x-b.x)*(c.y-d.y)-(a.y-b.y)*(c.x-d.x);if(Math.abs(den)<0.0001)return null;return p(((a.x*b.y-a.y*b.x)*(c.x-d.x)-(a.x-b.x)*(c.x*d.y-c.y*d.x))/den,((a.x*b.y-a.y*b.x)*(c.y-d.y)-(a.y-b.y)*(c.x*d.y-c.y*d.x))/den)}
 
@@ -645,6 +663,77 @@ if(state.overlays.groundPlane)
 drawLine(g.sa,g.sb,'#13a55c',4);
 drawLine(g.fa,g.fb,'#e63d45',4);
                   for(const [name,q,color] of [['Start A',g.sa,'#13a55c'],['Start B',g.sb,'#13a55c'],['Finish A',g.fa,'#e63d45'],['Finish B',g.fb,'#e63d45']])drawPoint(q,color,7,name);const progress=currentProgress(),m=runnerModel(progress);
+//
+// World Axis
+//
+const axes=worldAxes();
+
+const origin3D=
+    projectPoint3D(axes.origin);
+
+const x3D=
+    projectPoint3D(axes.x);
+
+const y3D=
+    projectPoint3D(axes.y);
+
+const z3D=
+    projectPoint3D(axes.z);
+
+const viewOffset=
+    p(500,300);                  
+
+drawLine(
+    add(viewOffset,origin3D),
+    add(viewOffset,x3D),
+    '#3b82f6',
+    2
+);
+
+drawLine(
+    add(viewOffset,origin3D),
+    add(viewOffset,y3D),
+    '#3b82f6',
+    2
+);
+
+drawLine(
+    add(viewOffset,origin3D),
+    add(viewOffset,z3D),
+    '#3b82f6',
+    2
+);
+drawPoint(
+    add(viewOffset,origin3D),
+    '#3b82f6',
+    5,
+    'O'
+);
+
+drawPoint(
+    add(viewOffset,x3D),
+    '#3b82f6',
+    5,
+    'X'
+);
+
+drawPoint(
+    add(viewOffset,y3D),
+    '#3b82f6',
+    5,
+    'Y'
+);
+
+drawPoint(
+    add(viewOffset,z3D),
+    '#3b82f6',
+    5,
+    'Z'
+);
+                  
+//
+// Cam-marker
+//
 const cam=cameraGroundPoint();
 
 drawPoint(
