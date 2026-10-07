@@ -132,6 +132,10 @@ camera:{
     roll:0,
 
     focal:800
+
+    moveSpeed:1,
+    rotateSpeed:2,
+  
 },
 projection:{
     near:0.1,
@@ -838,19 +842,38 @@ if(state.overlays.ground)drawPoint(m.ground,'#25333c',6,'Ground/contact point');
                   const mid=homographyPoint(0.5,0.5);
 drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective()}
 
-function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s';$('frameV').textContent=state.sim.frame;$('progressV').textContent=(m.progress*100).toFixed(1)+'%';const trueDistance=state.runner.x.toFixed(1);$('heightV').textContent=m.h.toFixed(1)+' px';const entries=[];if(state.overlays.algorithm)entries.push(['Estimated ground',fmtPoint(m.ground)],['Skeletal chest',fmtPoint(m.skeletal)],['Est. correction',fmtPoint(m.estimateCorrection)],['Front chest',fmtPoint(m.estimate)],['Corridor position',(currentProgress()*100).toFixed(2)+'%'],['Track length',state.sim.corridorLength.toFixed(1)+' m'],['Current distance',trueDistance+' m'],
+function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s';$('frameV').textContent=state.sim.frame;$('progressV').textContent=(m.progress*100).toFixed(1)+'%';const trueDistance=state.runner.x.toFixed(1);$('heightV').textContent=m.h.toFixed(1)+' px';
+    
+                           const entries=[];if(state.overlays.algorithm)entries.push(
+                             ['Estimated ground',fmtPoint(m.ground)],
+                             ['Skeletal chest',fmtPoint(m.skeletal)],
+                             ['Est. correction',fmtPoint(m.estimateCorrection)],
+                             ['Front chest',fmtPoint(m.estimate)],
+                             
+                             ['Corridor position',(currentProgress()*100).toFixed(2)+'%'],
+                             
+                             ['Track length',state.sim.corridorLength.toFixed(1)+' m'],
+                             
+                             ['Current distance',trueDistance+' m'],
+
+
+// Camera distances
+                             
 ['Cam → Runner',
  cameraDistanceToRunner().toFixed(2)+' m'],
                                                                                                                                                                                                                                                                                                                                          
 ['Cam → Foot',
- m.cameraToFoot.toFixed(2)],
+ m.cameraToFoot.toFixed(2)+' m'],
 
 ['Cam → Chest',
  m.cameraToChest.toFixed(2)+' m'],
 
 ['Cam → Head',
- m.cameraToHead.toFixed(2)],
+ m.cameraToHead.toFixed(2)+' m'],
        
+
+// Camera-space coordinates
+                             
 ['FootCam Z',
  m.footCam.z.toFixed(2)],
 
@@ -859,7 +882,30 @@ function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s'
 
 ['HeadCam Z',
  m.headCam.z.toFixed(2)]
+
+
+// Camera state
+
+['Camera X',
+ state.camera.x.toFixed(2)],
+
+['Camera Y',
+ state.camera.y.toFixed(2)],
+
+['Camera Z',
+ state.camera.z.toFixed(2)],
+
+['Yaw',
+ state.camera.yaw.toFixed(1)+'°'],
+
+['Pitch',
+ state.camera.pitch.toFixed(1)+'°'],
+
+['Roll',
+ state.camera.roll.toFixed(1)+'°']
+                             
        );if(state.overlays.groundTruth)entries.push(['True front chest',fmtPoint(m.truth)]);$('values').innerHTML=entries.map(([a,b])=>`<div><b>${a}</b>${b}</div>`).join('')||'<div><b>Values</b>Hidden by overlay settings</div>';updateSummary()}
+
 
 function updatePerspective(){
 
@@ -938,7 +984,136 @@ function currentCrossWidth(progress){const c=crossAt(progress);return lineLength
 // ====================================================
 // EVENT LISTENERS
 // ====================================================
-       canvas.addEventListener('pointerdown',e=>{if(e.ctrlKey){state.scrub=true;state.lastScrub=canvasPos(e);canvas.setPointerCapture(e.pointerId);return;}
+
+window.addEventListener(
+    'keydown',
+    e=>{
+
+        const move=
+            state.camera.moveSpeed;
+
+        const rotate=
+            state.camera.rotateSpeed;
+
+        const yaw=
+            degToRad(
+                state.camera.yaw
+            );
+
+        const forwardX=
+            Math.cos(yaw);
+
+        const forwardY=
+            Math.sin(yaw);
+
+        const leftX=
+           -forwardY;
+
+        const leftY=
+            forwardX;
+
+        //
+        // LOOK
+        //
+
+        if(!e.shiftKey){
+
+            if(e.key==='ArrowLeft')
+                state.camera.yaw-=rotate;
+
+            if(e.key==='ArrowRight')
+                state.camera.yaw+=rotate;
+
+            if(e.key==='ArrowUp')
+                state.camera.pitch+=rotate;
+
+            if(e.key==='ArrowDown')
+                state.camera.pitch-=rotate;
+
+        }
+
+        //
+        // ROLL
+        //
+
+        if(e.shiftKey){
+
+            if(e.key==='ArrowLeft')
+                state.camera.roll-=rotate;
+
+            if(e.key==='ArrowRight')
+                state.camera.roll+=rotate;
+
+        }
+
+        //
+        // MOVE
+        //
+
+        if(!e.shiftKey){
+
+            if(e.key==='w'){
+
+                state.camera.x+=
+                    forwardX*move;
+
+                state.camera.y+=
+                    forwardY*move;
+
+            }
+
+            if(e.key==='s'){
+
+                state.camera.x-=
+                    forwardX*move;
+
+                state.camera.y-=
+                    forwardY*move;
+
+            }
+
+            if(e.key==='a'){
+
+                state.camera.x+=
+                    leftX*move;
+
+                state.camera.y+=
+                    leftY*move;
+
+            }
+
+            if(e.key==='d'){
+
+                state.camera.x-=
+                    leftX*move;
+
+                state.camera.y-=
+                    leftY*move;
+
+            }
+
+        }
+
+        //
+        // VERTICAL
+        //
+
+        if(e.shiftKey){
+
+            if(e.key==='w')
+                state.camera.z+=move;
+
+            if(e.key==='s')
+                state.camera.z-=move;
+
+        }
+
+        render();
+
+    }
+);  
+  
+canvas.addEventListener('pointerdown',e=>{if(e.ctrlKey){state.scrub=true;state.lastScrub=canvasPos(e);canvas.setPointerCapture(e.pointerId);return;}
 const q=canvasPos(e);let best=null,d=22;for(const [name,key] of Object.entries({"Start A":'sa',"Start B":'sb',"Finish A":'fa',"Finish B":'fb'})){const z=state.geometry[key],dist=Math.hypot(q.x-z.x,q.y-z.y);if(dist<d){best={name,key};d=dist}}if(best){state.drag=best}else return;;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(state.scrub){const now=canvasPos(e);const delta=sub(now,state.lastScrub);const axisV=corridorAxisPixels();const movement=dot(delta,axisV);const current=currentProgress();const next=clamp(current+movement/500,-0.35,1.35);setProgress(next);state.lastScrub=now;syncControls();render();return;}
 if(!state.drag)return;const q=canvasPos(e);state.geometry[state.drag.key]=p(clamp(q.x,25,935),clamp(q.y,25,515));resetResults();render()});canvas.addEventListener('pointerup',()=>{state.drag=null;state.scrub=false;state.lastScrub=null;});
 overlayDefs.forEach(([k,label])=>{$('toggles').insertAdjacentHTML('beforeend',`<label><input type="checkbox" data-overlay="${k}" checked> ${label}</label>`)});$('toggles').onchange=e=>{if(e.target.dataset.overlay){state.overlays[e.target.dataset.overlay]=e.target.checked;render()}};
