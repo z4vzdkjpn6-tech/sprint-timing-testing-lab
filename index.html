@@ -116,7 +116,7 @@ const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:
     lean:12,
 
     x:0,
-    y:0.5,
+    y:1.5,
     z:0,
 
     start:-.18,
@@ -124,7 +124,7 @@ const state={geometry:{sa:{x:155,y:150},sb:{x:155,y:405},fa:{x:800,y:190},fb:{x:
 },
 camera:{
     x:-0.4,
-    y:1.3,
+    y:4,
     z:1.6,
 
     yaw:0,
@@ -138,11 +138,27 @@ projection:{
     far:1000,
     focal:800
 },
-             sim:{fps:30,multiplier:1,time:0,frame:0,playing:false,accum:0,corridorLength:100},overlays:Object.fromEntries(overlayDefs.map(([k])=>[k,true])),results:{start:null,finish:null},samples:[],drag:null,reportUrl:null,scrub:false,lastScrub:null};
+             sim:{fps:30,multiplier:1,time:0,frame:0,playing:false,accum:0,corridorLength:100,corridorWidth:3},overlays:Object.fromEntries(overlayDefs.map(([k])=>[k,true])),results:{start:null,finish:null},samples:[],drag:null,reportUrl:null,scrub:false,lastScrub:null};
 
 ///////////////////////////////////
 /////////// 3D helpers ////////////
 ///////////////////////////////////
+  
+// ====================================================
+// SPACE
+//
+// X = corridor direction (meters)
+//
+// Y = lateral direction (meters)
+//
+// Z = height (meters)
+//
+// Everything exists in Space.
+//
+// Cameras observe Space.
+// Corridors exist inside Space.
+// Runners move inside Space.
+// ====================================================
   
 function worldAxes(){
 
@@ -242,7 +258,17 @@ function project(point){const a=corridorPoint(0),b=corridorPoint(1),v=sub(b,a);r
 function point3(x,y,z){
     return {x,y,z};
 }
-       
+
+function spaceOrigin(){
+
+    return point3(
+        0,
+        0,
+        0
+    );
+
+}
+
 function projectWorldPoint(x,y,z){
 
     const q=worldToGroundPlane(x,y);
@@ -596,6 +622,7 @@ function fmtPoint(q){return `(${q.x.toFixed(1)}, ${q.y.toFixed(1)})`}
 function drawLine(a,b,color,width=3,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.restore()}
 function drawPoint(q,color,r=6,label=''){ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(q.x,q.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();if(label&&state.overlays.labels){ctx.fillStyle='#132630';ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,q.x+8,q.y-8)}ctx.restore()}
 function drawVP(vp,color,label){if(!vp)return;ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(vp.x,vp.y,8,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=color;ctx.font='12px -apple-system,sans-serif';ctx.fillText(label,vp.x+10,vp.y-10);ctx.restore()}
+
 function worldToGroundPlane(x,y){
 
     return homographyPoint(
@@ -606,7 +633,7 @@ function worldToGroundPlane(x,y){
             x/state.sim.corridorLength
         ),
 
-        y
+        y/state.sim.corridorWidth
 
     );
 
