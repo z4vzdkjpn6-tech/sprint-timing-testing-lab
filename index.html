@@ -309,7 +309,7 @@ function worldToCamera(point){
     //
 
     const yaw=
-        degToRad(state.camera.yaw);
+        degToRad(-state.camera.yaw);
 
     const cy=Math.cos(yaw);
     const sy=Math.sin(yaw);
@@ -325,7 +325,7 @@ function worldToCamera(point){
     //
 
     const pitch=
-        degToRad(state.camera.pitch);
+        degToRad(-state.camera.pitch);
 
     const cp=Math.cos(pitch);
     const sp=Math.sin(pitch);
@@ -341,7 +341,7 @@ function worldToCamera(point){
     //
 
     const roll=
-        degToRad(state.camera.roll);
+        degToRad(-state.camera.roll);
 
     const cr=Math.cos(roll);
     const sr=Math.sin(roll);
