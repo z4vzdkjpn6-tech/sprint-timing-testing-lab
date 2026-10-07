@@ -304,24 +304,59 @@ function worldToCamera(point){
     let y=point.y-cam.y;
     let z=point.z-cam.z;
 
+    //
+    // YAW
+    //
+
     const yaw=
         degToRad(state.camera.yaw);
 
     const cy=Math.cos(yaw);
     const sy=Math.sin(yaw);
 
-    const rx=
+    const yawX=
         x*cy-y*sy;
 
-    const ry=
+    const yawY=
         x*sy+y*cy;
 
-    return point3(
-        rx,
-        ry,
-        z
-    );
+    //
+    // PITCH
+    //
 
+    const pitch=
+        degToRad(state.camera.pitch);
+
+    const cp=Math.cos(pitch);
+    const sp=Math.sin(pitch);
+
+    const pitchX=
+        yawX*cp-z*sp;
+
+    const pitchZ=
+        yawX*sp+z*cp;
+
+    //
+    // ROLL
+    //
+
+    const roll=
+        degToRad(state.camera.roll);
+
+    const cr=Math.cos(roll);
+    const sr=Math.sin(roll);
+
+    const rollY=
+        yawY*cr-pitchZ*sr;
+
+    const rollZ=
+        yawY*sr+pitchZ*cr;
+
+    return point3(
+        pitchX,
+        rollY,
+        rollZ
+);
 }
        
 function cameraSpaceToScreen(point){
