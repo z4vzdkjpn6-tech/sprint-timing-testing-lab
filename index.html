@@ -755,6 +755,7 @@ if(state.spaceView){
     'SPACE O'
 );
 }
+}  
   
 function updateReadouts(m){$('timeV').textContent=state.sim.time.toFixed(3)+' s';$('frameV').textContent=state.sim.frame;$('progressV').textContent=(m.progress*100).toFixed(1)+'%';const trueDistance=state.runner.x.toFixed(1);$('heightV').textContent=m.h.toFixed(1)+' px';
     
