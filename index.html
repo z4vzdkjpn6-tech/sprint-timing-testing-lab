@@ -1082,8 +1082,9 @@ $('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetS
 
         render();
 
-});
-
+})
+}
+                  
 let last=performance.now();
 function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(state.sim.playing){state.sim.accum+=dt*state.sim.multiplier;const interval=1/state.sim.fps;let n=0;while(state.sim.accum>=interval&&n++<4){advanceFrame();state.sim.accum-=interval}}requestAnimationFrame(loop)}syncControls();render();requestAnimationFrame(loop);
 </script></body></html>
