@@ -276,9 +276,8 @@ function projectWorldPoint(x,y,z){
 
     const cam=state.camera;
 
-    const d=distance3(state.camera,{x,y,z});
- 
-    const lift=600*z/Math.max(d,.001);
+    const d=distance3(state.camera,{x,y,z}); 
+    const lift=600*z/Math.max(d,.001); 
  
     return p(q.x,q.y-lift);
  
@@ -745,15 +744,32 @@ drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective();
                   
 if(state.spaceView){
   
-  drawPoint(
-    p(
-        canvas.width/2,
-        canvas.height/2
-    ),
+  const o=p(
+    canvas.width/2,
+    canvas.height/2
+);
+
+drawLine(
+    p(o.x-20,o.y),
+    p(o.x+20,o.y),
+    '#3b82f6',
+    2
+);
+
+drawLine(
+    p(o.x,o.y-20),
+    p(o.x,o.y+20),
+    '#3b82f6',
+    2
+);
+
+drawPoint(
+    o,
     '#3b82f6',
     8,
     'SPACE O'
 );
+  
 }
 }  
   
@@ -880,8 +896,28 @@ function updatePerspective(){
 }
        
 function recText(name,rec){if(!rec)return `${name}: not crossed`;return `${name}: estimate ${rec.estimatedTime.toFixed(4)} s | truth ${rec.truthTime?.toFixed(4)??'—'} s | error ${rec.errorMs===null?'—':(rec.errorMs>=0?'+':'')+rec.errorMs+' ms'}`}
-function updateSummary(){const a=state.results.start,b=state.results.finish;let text=`n${recText('Start',a)}n${recText('Finish',b)}`;if(a&&b&&a.truthTime!==null&&b.truthTime!==null){const est=b.estimatedTime-a.estimatedTime,trueT=b.truthTime-a.truthTime,err=Math.round((est-trueT)*1000),status=Math.abs(err)<=15?'PASS':Math.abs(err)<=35?'REVIEW':'FAIL';text+=`\nEstimated sprint: ${est.toFixed(4)} s | Truth: ${trueT.toFixed(4)} s\nTotal error: ${(err>=0?'+':'')+err} ms | Result: ${status}\n\nCrossings use segment interpolation within the current frame interval and retain a small past-frame diagnostic window.`}$('summary').textContent=text}
+function updateSummary(){const a=state.results.start,b=state.results.finish;let text=`${recText('Start',a)}${recText('Finish',b)}`;if(a&&b&&a.truthTime!==null&&b.truthTime!==null){const est=b.estimatedTime-a.estimatedTime,trueT=b.truthTime-a.truthTime,err=Math.round((est-trueT)*1000),status=Math.abs(err)<=15?'PASS':Math.abs(err)<=35?'REVIEW':'FAIL';text+=`\nEstimated sprint: ${est.toFixed(4)} s | Truth: ${trueT.toFixed(4)} s\nTotal error: ${(err>=0?'+':'')+err} ms | Result: ${status}\n\nCrossings use segment interpolation within the current frame interval and retain a small past-frame diagnostic window.`}$('summary').textContent=text}
 function syncControls(){const r=state.runner;const defs=[['runnerSpeed',r.speed,'runnerSpeedV',v=>v+' m/s'],['height',r.height,'heightV',v=>v+' m'],['lean',r.lean,'leanV',v=>v+'°'],['startPos',r.start,'startPosV',v=>(v*100).toFixed(0)+'%'],['simSpeed',state.sim.multiplier,'simSpeedV',v=>v+'×'],['corridorLength',state.sim.corridorLength,'corridorLengthV',v=>v+' m']];for(const [id,val,label,format] of defs){$(id).value=val;$(label).textContent=format(val)}$('manualPosition').value=currentProgress();$('manualPositionV').textContent=(currentProgress()*100).toFixed(0)+'%'}
+function syncCameraControls(){
+
+    $('yaw').value = state.camera.yaw;
+    $('yawV').textContent =
+        state.camera.yaw.toFixed(0) + '°';
+
+    $('pitch').value = state.camera.pitch;
+    $('pitchV').textContent =
+        state.camera.pitch.toFixed(0) + '°';
+
+    $('roll').value = state.camera.roll;
+    $('rollV').textContent =
+        state.camera.roll.toFixed(0) + '°';
+
+    $('focal').value = state.camera.focal;
+    $('focalV').textContent =
+        state.camera.focal.toFixed(0);
+
+}
+  
 function exportReport(){const m=runnerModel(currentProgress()),report={laboratory:'Sprint Timing Testing Laboratory',version:'V1',createdAt:new Date().toISOString(),test:{id:'lab-'+Date.now(),frameRate:state.sim.fps,simulationDurationSeconds:state.sim.time,runnerSpeedMps:state.runner.speed,runnerHeightMeters:state.runner.height,bodyLeanDegrees:state.runner.lean,movementDirection:state.runner.direction===1?'start-to-finish':'finish-to-start'},geometry:{startA:state.geometry.sa,startB:state.geometry.sb,finishA:state.geometry.fa,finishB:state.geometry.fb,corridorCalculationVersion:'linear-interpolation-v1',corridorStartWidth:len(sub(state.geometry.sb,state.geometry.sa)),corridorEndWidth:len(sub(state.geometry.fb,state.geometry.fa)),corridorAxisLength:len(sub(corridorPoint(1),corridorPoint(0)))},currentGroundTruth:{ground:m.ground,skeletal:m.skeletal,front:m.truth},crossings:{start:state.results.start,finish:state.results.finish},
 perspective:{corridorVP:corridorVP(),lineVP:lineVP(),perspectiveStrength:perspectiveStrength(),vpDistance:corridorVP()&&lineVP()?Math.hypot(corridorVP().x-lineVP().x,corridorVP().y-lineVP().y):null,corridorToVP:corridorVP()?Math.hypot(corridorVP().x-corridorPoint(.5).x,corridorVP().y-corridorPoint(.5).y):null,startLinePx:lineLength(state.geometry.sa,state.geometry.sb),finishLinePx:lineLength(state.geometry.fa,state.geometry.fb),lengthRatio:lineLength(state.geometry.fa,state.geometry.fb)/lineLength(state.geometry.sa,state.geometry.sb)},
 errors:buildErrors(),
@@ -903,6 +939,21 @@ function currentCrossWidth(progress){const c=crossAt(progress);return lineLength
 window.addEventListener(
     'keydown',
     e=>{
+      
+      if(
+    [
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'w',
+        'a',
+        's',
+        'd'
+    ].includes(e.key)
+){
+    e.preventDefault();
+}
 
         const move=
             state.camera.moveSpeed;
@@ -947,6 +998,13 @@ window.addEventListener(
 
         }
 
+      state.camera.pitch =
+    clamp(
+        state.camera.pitch,
+        -89,
+        89
+    );
+      
         //
         // ROLL
         //
@@ -1022,7 +1080,8 @@ window.addEventListener(
                 state.camera.z-=move;
 
         }
-
+      
+        syncCameraControls();
         render();
 
     }
@@ -1066,12 +1125,17 @@ $('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetS
 });
        $('focal').addEventListener('input',e=>{
 
-    state.camera.focal=+e.target.value;
+    state.camera.focal =
+        clamp(
+            +e.target.value,
+            100,
+            3000
+        );
 
-    $('focalV').textContent=state.camera.focal.toFixed(0);
+    $('focalV').textContent=
+        state.camera.focal.toFixed(0);
 
     render();
-
 });
 
   $('toggleSpaceView').addEventListener(
