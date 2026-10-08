@@ -700,10 +700,6 @@ if(state.overlays.groundPlane)
 drawLine(g.sa,g.sb,'#13a55c',4);
 drawLine(g.fa,g.fb,'#e63d45',4);
                   for(const [name,q,color] of [['Start A',g.sa,'#13a55c'],['Start B',g.sb,'#13a55c'],['Finish A',g.fa,'#e63d45'],['Finish B',g.fb,'#e63d45']])drawPoint(q,color,7,name);const progress=currentProgress(),m=runnerModel(progress);
-//
-// World Axis
-//
-
                   
 //
 // Cam-marker
@@ -740,8 +736,13 @@ add(p(500,300),m.headCameraProjected),
 if(state.overlays.ground)drawPoint(m.ground,'#25333c',6,'Ground/contact point');if(state.overlays.skeletal)drawPoint(m.skeletal,'#1976d2',6,'Skeletal chest point');if(state.overlays.estimate){drawLine(m.skeletal,m.estimate,'#ff9f0a',2,[3,3]);drawPoint(m.estimate,'#ff9f0a',7,'Estimated front chest')};if(state.overlays.frontTruth){drawLine(m.skeletal,m.truth,'#8e35c7',2,[3,3]);drawPoint(m.truth,'#8e35c7',6,'Ground truth front chest')};if(state.overlays.direction){ctx.save();ctx.strokeStyle='#182d39';ctx.lineWidth=3;const to=add(m.ground,mul(m.dir,54));ctx.beginPath();ctx.moveTo(m.ground.x,m.ground.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.fillStyle='#182d39';ctx.beginPath();ctx.arc(to.x,to.y,5,0,Math.PI*2);ctx.fill();ctx.restore()}if(state.overlays.markers)for(const rec of Object.values(state.results)){if(rec){drawPoint(rec.estimated.front,'#ff9f0a',9,`${rec.line} estimate`);drawPoint(rec.groundTruth.front,'#8e35c7',5,`${rec.line} truth`);}}
 
                   const mid=homographyPoint(0.5,0.5);
-drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective()};
+drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective();
 
+
+//
+// SPACE VIEW
+//                  
+                  
 if(state.spaceView){
   
   drawPoint(
