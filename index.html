@@ -1016,14 +1016,28 @@ function lineLength(a,b){return Math.hypot(b.x-a.x,b.y-a.y)}
 function currentCrossWidth(progress){const c=crossAt(progress);return lineLength(c.a,c.b)}
 
 
+
+
+
+//
+// USER INPUT PIPELINE
+//
+// Keyboard / Mouse / UI
+//          ↓
+// Update State
+//          ↓
+// Render
+//
+  
       // ====================================================
       // UI
-      //
-      // Keyboard
-      // Mouse
-      // Sliders
-      // Buttons
       // ====================================================
+
+  
+  // ----------------------------------------------------
+  // Keyboard
+  // ----------------------------------------------------
+
   
 window.addEventListener(
     'keydown',
@@ -1174,20 +1188,56 @@ window.addEventListener(
         render();
 
     }
-);  
+);
+
+  
+  // ----------------------------------------------------
+  // Mouse
+  // ----------------------------------------------------
+
   
 canvas.addEventListener('pointerdown',e=>{if(e.ctrlKey){state.scrub=true;state.lastScrub=canvasPos(e);canvas.setPointerCapture(e.pointerId);return;}
-const q=canvasPos(e);let best=null,d=22;for(const [name,key] of Object.entries({"Start A":'sa',"Start B":'sb',"Finish A":'fa',"Finish B":'fb'})){const z=state.geometry[key],dist=Math.hypot(q.x-z.x,q.y-z.y);if(dist<d){best={name,key};d=dist}}if(best){state.drag=best}else return;;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(state.scrub){const now=canvasPos(e);const delta=sub(now,state.lastScrub);const axisV=corridorAxisPixels();const movement=dot(delta,axisV);const current=currentProgress();const next=clamp(current+movement/500,-0.35,1.35);setProgress(next);state.lastScrub=now;syncControls();render();return;}
-if(!state.drag)return;const q=canvasPos(e);state.geometry[state.drag.key]=p(clamp(q.x,25,935),clamp(q.y,25,515));resetResults();render()});canvas.addEventListener('pointerup',()=>{state.drag=null;state.scrub=false;state.lastScrub=null;});
-overlayDefs.forEach(([k,label])=>{$('toggles').insertAdjacentHTML('beforeend',`<label><input type="checkbox" data-overlay="${k}" checked> ${label}</label>`)});$('toggles').onchange=e=>{if(e.target.dataset.overlay){state.overlays[e.target.dataset.overlay]=e.target.checked;render()}};
+const q=canvasPos(e);let best=null,d=22;for(const [name,key] of Object.entries({"Start A":'sa',"Start B":'sb',"Finish A":'fa',"Finish B":'fb'})){const z=state.geometry[key],dist=Math.hypot(q.x-z.x,q.y-z.y);if(dist<d){best={name,key};d=dist}}if(best){state.drag=best}else return;;canvas.setPointerCapture(e.pointerId)});
+
+canvas.addEventListener('pointermove',e=>{if(state.scrub){const now=canvasPos(e);const delta=sub(now,state.lastScrub);const axisV=corridorAxisPixels();const movement=dot(delta,axisV);const current=currentProgress();const next=clamp(current+movement/500,-0.35,1.35);setProgress(next);state.lastScrub=now;syncControls();render();return;}
+if(!state.drag)return;const q=canvasPos(e);state.geometry[state.drag.key]=p(clamp(q.x,25,935),clamp(q.y,25,515));resetResults();render()});
+
+canvas.addEventListener('pointerup',()=>{state.drag=null;state.scrub=false;state.lastScrub=null;});  
+
+  
+  // ----------------------------------------------------
+  // Overlay Controls
+  // ----------------------------------------------------
+
+  
+overlayDefs.forEach(([k,label])=>{$('toggles').insertAdjacentHTML('beforeend',`<label><input type="checkbox" data-overlay="${k}" checked> ${label}</label>`)});
+
+$('toggles').onchange=e=>{if(e.target.dataset.overlay){state.overlays[e.target.dataset.overlay]=e.target.checked;render()}};
+
+  
+  // ----------------------------------------------------
+  // Simulation Controls
+  // ----------------------------------------------------
+
+  
 [['runnerSpeed','speed'],
  ['height','height'],
  ['lean','lean'],
  ['startPos','start'],
- ['simSpeed',null]].forEach(([id,key])=>$(id).oninput=()=>{if(key){state.runner[key]=+$(id).value;resetResults()}else state.sim.multiplier=+$(id).value;syncControls();render()});$('fps').onchange=()=>{state.sim.fps=+$('fps').value;resetResults();render()};$('corridorLength').oninput=()=>{state.sim.corridorLength=+$('corridorLength').value;syncControls();render()};$('manualPosition').oninput=()=>{setProgress(+$('manualPosition').value);syncControls();render()};
-$('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetSimulation()};$('play').onclick=()=>state.sim.playing=true;$('pause').onclick=()=>state.sim.playing=false;$('restart').onclick=resetSimulation;$('step').onclick=advanceFrame;$('back').onclick=()=>{state.sim.time=Math.max(0,state.sim.time-1/state.sim.fps);state.sim.frame=Math.max(0,state.sim.frame-1);resetResults();render()};$('runTest').onclick=runTest;$('export').onclick=exportReport;
-     
-       $('yaw').addEventListener('input',e=>{
+ ['simSpeed',null]].forEach(([id,key])=>$(id).oninput=()=>{if(key){state.runner[key]=+$(id).value;resetResults()}else state.sim.multiplier=+$(id).value;syncControls();render()});
+  
+$('fps').onchange=()=>{state.sim.fps=+$('fps').value;resetResults();render()};
+$('corridorLength').oninput=()=>{state.sim.corridorLength=+$('corridorLength').value;syncControls();render()};
+$('manualPosition').oninput=()=>{setProgress(+$('manualPosition').value);syncControls();render()};  
+$('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetSimulation()};
+
+  
+  // ----------------------------------------------------
+  // Camera Controls
+  // ----------------------------------------------------
+
+
+$('yaw').addEventListener('input',e=>{
     state.camera.yaw=+e.target.value;
 
     $('yawV').textContent=state.camera.yaw.toFixed(0)+'°';
@@ -1227,16 +1277,37 @@ $('direction').onchange=()=>{state.runner.direction=+$('direction').value;resetS
     render();
 });
 
-  $('toggleSpaceView').addEventListener(
-    'click',
-    ()=>{
+      $('toggleSpaceView').addEventListener('click',()=>{
 
-        state.spaceView=
-            !state.spaceView;
+    state.spaceView=
+        !state.spaceView;
 
-        render();
+    render();
 
 });
+
+  
+  // ----------------------------------------------------
+  // Action Buttons
+  // ----------------------------------------------------
+  
+  
+$('play').onclick=()=>state.sim.playing=true;
+$('pause').onclick=()=>state.sim.playing=false;
+$('restart').onclick=resetSimulation;
+$('step').onclick=advanceFrame;
+$('back').onclick=()=>{state.sim.time=Math.max(0,state.sim.time-1/state.sim.fps);state.sim.frame=Math.max(0,state.sim.frame-1);resetResults();render()};
+$('runTest').onclick=runTest;
+$('export').onclick=exportReport;
+
+
+
+
+
+     
+       
+
+  
                   
 let last=performance.now();
 function loop(now){const dt=Math.min(.1,(now-last)/1000);last=now;if(state.sim.playing){state.sim.accum+=dt*state.sim.multiplier;const interval=1/state.sim.fps;let n=0;while(state.sim.accum>=interval&&n++<4){advanceFrame();state.sim.accum-=interval}}requestAnimationFrame(loop)}syncControls();render();requestAnimationFrame(loop);
