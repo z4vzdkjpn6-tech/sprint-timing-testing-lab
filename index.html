@@ -472,9 +472,77 @@ function distance3(a,b){
        
 
 
+  
+  
+      // ====================================================
+      // SIMULATION
+      //
+      // Time
+      // Frames
+      // Runner movement
+      // ====================================================
+
+
+function resetResults(){state.results={start:null,finish:null};state.samples=[]}
+
+function resetSimulation(){state.runner.x = 0;state.sim.time=0;state.sim.frame=0;state.sim.accum=0;state.sim.playing=false;resetResults();render()}
+
+function currentDepthMeters(){
+    return state.runner.x;
+}
+
+function currentProgress(){
+
+    return state.runner.start +
+           state.runner.direction *
+           (
+             state.runner.x /
+             state.sim.corridorLength
+           );
+
+}
+  
+function setProgress(progress){
+
+    state.runner.x =
+    (progress-state.runner.start) *
+    state.sim.corridorLength;
+
+}
+
+// ====================================================
+// FRAME UPDATE PIPELINE
+//
+// Advance time
+//     ↓
+// Move runner
+//     ↓
+// Update progress
+//     ↓
+// Detect crossings
+//     ↓
+// Store diagnostics
+//     ↓
+// Render
+// ===============================  
+  
+function advanceFrame(){console.log(
+    "time=",state.sim.time,
+    "progress=",currentProgress()
+);const oldTime=state.sim.time,oldProgress=currentProgress(),old=runnerModel(oldProgress);
+    state.sim.time += 1/state.sim.fps;
+    state.sim.frame++;
+                        
+    state.runner.x +=
+    state.runner.speed *
+    (1/state.sim.fps);
+const progress=currentProgress(),model=runnerModel(progress);
+state.samples.push({frame:state.sim.frame,time:state.sim.time,progress,estimate:model.estimate,truth:model.truth});if(state.samples.length>7)state.samples.shift();for(const [key,line] of [['start',0],['finish',1]])if(!state.results[key]){const rec=crossingRecord(line,old,model,oldTime,state.sim.time);if(rec)state.results[key]=rec}if(progress>1.35||progress<-.35){state.sim.playing=false}render()}
 
 
 
+  
+  
       // ====================================================
       // RUNNER MODEL
       // ====================================================
@@ -611,42 +679,11 @@ $('focalV').textContent=
        
 function lineCross(prev,now,line){const a=project(prev)-line,b=project(now)-line;if(a===0)return 0;if(a*b>0)return null;return clamp(Math.abs(a)/Math.max(.000001,Math.abs(a)+Math.abs(b)),0,1)}
 function crossingRecord(line,oldModel,model,oldTime,time){const e=lineCross(oldModel.estimate,model.estimate,line),t=lineCross(oldModel.truth,model.truth,line);if(e===null&&t===null)return null;const frac=e??t??1,at=oldTime+(time-oldTime)*frac, m=runnerModel(oldModel.progress+(model.progress-oldModel.progress)*frac);const truthTime=t===null?null:oldTime+(time-oldTime)*t;return{line:line===0?'start':'finish',estimatedTime:at,truthTime,errorMs:truthTime===null?null:Math.round((at-truthTime)*1000),frame:state.sim.frame,estimated:{ground:m.ground,skeletal:m.skeletal,front:m.estimate,correction:m.estimateCorrection,progress:project(m.estimate),height:m.h,lean:state.runner.lean,direction:m.dir},groundTruth:{front:m.truth,correction:m.truthCorrection},status:'confirmed by local temporal interpolation',window:state.samples.slice(-3)};}
-function resetResults(){state.results={start:null,finish:null};state.samples=[]}
-function resetSimulation(){state.runner.x = 0;state.sim.time=0;state.sim.frame=0;state.sim.accum=0;state.sim.playing=false;resetResults();render()}
-function currentDepthMeters(){
-    return state.runner.x;
-}
-function currentProgress(){
 
-    return state.runner.start +
-           state.runner.direction *
-           (
-             state.runner.x /
-             state.sim.corridorLength
-           );
 
-}
 
-function setProgress(progress){
 
-    state.runner.x =
-    (progress-state.runner.start) *
-    state.sim.corridorLength;
-
-}
        
-function advanceFrame(){console.log(
-    "time=",state.sim.time,
-    "progress=",currentProgress()
-);const oldTime=state.sim.time,oldProgress=currentProgress(),old=runnerModel(oldProgress);
-    state.sim.time += 1/state.sim.fps;
-    state.sim.frame++;
-                        
-    state.runner.x +=
-    state.runner.speed *
-    (1/state.sim.fps);
-const progress=currentProgress(),model=runnerModel(progress);
-state.samples.push({frame:state.sim.frame,time:state.sim.time,progress,estimate:model.estimate,truth:model.truth});if(state.samples.length>7)state.samples.shift();for(const [key,line] of [['start',0],['finish',1]])if(!state.results[key]){const rec=crossingRecord(line,old,model,oldTime,state.sim.time);if(rec)state.results[key]=rec}if(progress>1.35||progress<-.35){state.sim.playing=false}render()}
 
 function fmtPoint(q){return `(${q.x.toFixed(1)}, ${q.y.toFixed(1)})`}
 
