@@ -272,60 +272,6 @@ function spaceOrigin(){
 
 }
 
-
-      // ====================================================
-      // PROJECTION
-      //
-      // World Space
-      //     ↓
-      // Camera Space
-      //     ↓
-      // Screen Space
-      // ====================================================  
-  
-function projectWorldPoint(x,y,z){
-
-    const q=worldToGroundPlane(x,y);
-
-    const cam=state.camera;
-
-    const d=distance3(state.camera,{x,y,z}); 
-    const lift=600*z/Math.max(d,.001); 
- 
-    return p(q.x,q.y-lift);
- 
-}
-       
-// Future rendering pipeline:
-//
-// World Point
-//      ↓
-// View Matrix
-//      ↓
-// Projection Matrix
-//      ↓
-// Screen Point
-       
-function projectPoint3(point){
-
-    return projectWorldPoint(
-        point.x,
-        point.y,
-        point.z
-    );
-
-}
-       
-function distance3(a,b){
-
-    const dx=a.x-b.x;
-    const dy=a.y-b.y;
-    const dz=a.z-b.z;
-
-    return Math.hypot(dx,dy,dz);
-
-}
-       
 function runnerFootPoint(){
     return point3(
         state.runner.x,
@@ -361,8 +307,7 @@ function cameraPoint(){
     );
 
 }
-
-
+      
       // ====================================================
       // CAMERA
       //
@@ -460,6 +405,50 @@ function cameraDistanceToRunner(){
 
 }
 
+
+      // ====================================================
+      // PROJECTION
+      //
+      // World Space
+      //     ↓
+      // Camera Space
+      //     ↓
+      // Screen Space
+      // ====================================================  
+  
+function projectWorldPoint(x,y,z){
+
+    const q=worldToGroundPlane(x,y);
+
+    const cam=state.camera;
+
+    const d=distance3(state.camera,{x,y,z}); 
+    const lift=600*z/Math.max(d,.001); 
+ 
+    return p(q.x,q.y-lift);
+ 
+}
+       
+function projectPoint3(point){
+
+    return projectWorldPoint(
+        point.x,
+        point.y,
+        point.z
+    );
+
+}
+  
+// World Point
+//     ↓
+// worldToCamera()
+//     ↓
+// Camera Point
+//     ↓
+// cameraSpaceToScreen()
+//     ↓
+// Screen Point
+  
 function projectPoint3D(point){
 
     const camPoint=
@@ -470,6 +459,20 @@ function projectPoint3D(point){
     );
 
 }
+  
+function distance3(a,b){
+
+    const dx=a.x-b.x;
+    const dy=a.y-b.y;
+    const dz=a.z-b.z;
+
+    return Math.hypot(dx,dy,dz);
+
+}
+       
+
+
+
 
 
       // ====================================================
