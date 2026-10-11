@@ -95,6 +95,19 @@
         <span id="focalV">800</span>
     </div>
 </div>
+  
+<label>
+    Space Plane Y
+    <input
+        id="spacePlaneY"
+        type="range"
+        min="-50"
+        max="50"
+        step="1"
+        value="0">
+    <span id="spacePlaneYV">0</span>
+</label>  
+  
 <div class="card"><h2>Simulation</h2><label class="control">Simulation speed <input id="simSpeed" type="range" min="0.25" max="4" step="0.25"><span id="simSpeedV" class="value"></span></label><label class="control">Frame rate <select id="fps"><option value="24">24 fps</option><option value="30" selected>30 fps</option><option value="60">60 fps</option></select></label><label class="control">Track length <input id="corridorLength" type="range" min="10" max="150" step="1"><span id="corridorLengthV" class="value"></span></label><label class="control">Corridor position <input id="manualPosition" type="range" min="-0.35" max="1.35" step="0.01"><span id="manualPositionV" class="value"></span></label><div class="readout"><div><b>Simulation time</b><span id="timeV"></span></div><div><b>Frame</b><span id="frameV"></span></div><div><b>Corridor position</b><span id="progressV"></span></div><div><b>Apparent height</b><span id="heightV"></span></div></div></div>
 <div class="card"><h2>Runner</h2><label class="control">Speed <input id="runnerSpeed" type="range" min="3" max="13" step="0.1"><span id="runnerSpeedV" class="value"></span></label><label class="control">Sprinter Height <input id="height" type="range"
        min="1.50"
@@ -153,6 +166,15 @@ projection:{
     focal:800
 },
 
+
+  // SPACE //             
+             
+spacePlane:{
+    yOffset:0,
+    spacing:5,
+    size:100
+},
+             
 spaceCamera:{
 
     yaw:45,
@@ -741,8 +763,68 @@ for(let y=0;y<=1.0001;y+=0.1){
     drawLine(a,b,'#0000ff',2);
 
 }
+  
+function drawSpacePlaneYZ(){
+
+    const spacing =
+        state.spacePlane.spacing;
+
+    const size =
+        state.spacePlane.size;
+
+    const yShift =
+        state.spacePlane.yOffset;
+
+    for(
+        let y=-size;
+        y<=size;
+        y+=spacing
+    ){
+
+        for(
+            let z=0;
+            z<=size;
+            z+=spacing
+        ){
+
+            const screen =
+                projectPoint3D({
+                    x:0,
+                    y:y+yShift,
+                    z:z
+                });
+
+            if(!screen) continue;
+
+            drawPoint(
+                screen,
+                '#3b82f6',
+                2
+            );
+
+        }
+
+    }
+
+const origin =
+    projectPoint3D({
+        x:0,
+        y:yShift,
+        z:0
+    });
+
+if(origin){
+
+    drawPoint(
+        origin,
+        '#60a5fa',
+        6,
+        'O'
+    );
 
 }
+}
+  
 function drawRunner(m){const side=mul(norm(p(-m.torsoAxis.y,m.torsoAxis.x)),m.h*.10),lineW=Math.max(3,m.h*.045);const hipLeft=add(m.pelvis,side),hipRight=sub(m.pelvis,side),shoulderLeft=add(m.shoulders,side),shoulderRight=sub(m.shoulders,side);const frontFoot=add(m.ground,mul(m.dir,m.h*.13)),backFoot=sub(m.ground,mul(m.dir,m.h*.10));const frontKnee=add(lerp(hipLeft,frontFoot,.54),mul(m.dir,m.h*.08)),backKnee=sub(lerp(hipRight,backFoot,.50),mul(m.dir,m.h*.07));const frontElbow=add(shoulderLeft,mul(m.dir,m.h*.18)),backElbow=sub(shoulderRight,mul(m.dir,m.h*.15));const frontWrist=add(frontElbow,add(mul(m.dir,m.h*.10),mul(m.screenUp,m.h*.12))),backWrist=add(backElbow,add(mul(m.dir,-m.h*.08),mul(m.screenUp,m.h*.12)));ctx.save();ctx.lineCap='round';ctx.lineJoin='round';drawLine(m.head,m.shoulders,'#203944',lineW);drawLine(m.shoulders,m.pelvis,'#203944',lineW);drawLine(shoulderLeft,frontElbow,'#203944',lineW);drawLine(frontElbow,frontWrist,'#203944',lineW);drawLine(shoulderRight,backElbow,'#203944',lineW);drawLine(backElbow,backWrist,'#203944',lineW);drawLine(hipLeft,frontKnee,'#203944',lineW);drawLine(frontKnee,frontFoot,'#203944',lineW);drawLine(hipRight,backKnee,'#203944',lineW);drawLine(backKnee,backFoot,'#203944',lineW);ctx.fillStyle='#e4b18a';ctx.beginPath();ctx.arc(m.head.x,m.head.y,m.h*.11,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 
@@ -821,8 +903,11 @@ drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective();
 //                  
                   
 if(state.spaceView){
+
+  drawSpacePlaneYZ();
+
   
-  const o=p(
+const o=p(
     canvas.width/2,
     canvas.height/2
 );
@@ -1271,20 +1356,35 @@ $('yaw').addEventListener('input',e=>{
             3000
         );
 
-    $('focalV').textContent=
+       $('focalV').textContent=
         state.camera.focal.toFixed(0);
 
     render();
 });
 
-      $('toggleSpaceView').addEventListener('click',()=>{
+       $('toggleSpaceView').addEventListener('click',()=>{
 
-    state.spaceView=
-        !state.spaceView;
+            state.spaceView=
+              !state.spaceView;
 
-    render();
+            render();
 
 });
+
+       $('spacePlaneY').addEventListener(
+           'input',
+           e=>{
+
+               state.spacePlane.yOffset =
+                   +e.target.value;
+
+               $('spacePlaneYV').textContent =
+                   state.spacePlane.yOffset;
+
+               render();
+
+    }
+);
 
   
   // ----------------------------------------------------
