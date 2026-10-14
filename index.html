@@ -947,20 +947,26 @@ function drawRunner(m){const side=mul(norm(p(-m.torsoAxis.y,m.torsoAxis.x)),m.h*
 
 function drawRunnerInSpace(){
 
+  console.log('drawRunnerInSpace running');
+  
     const foot =
-        projectSpaceViewPoint(
-            runnerFootPoint()
-        );
+    projectSpaceViewPoint(
+        runnerFootPoint()
+    );
 
-    const chest =
-        projectSpaceViewPoint(
-            runnerChestPoint()
-        );
+const chest =
+    projectSpaceViewPoint(
+        runnerChestPoint()
+    );
 
-    const head =
-        projectSpaceViewPoint(
-            runnerHeadPoint()
-        );
+const head =
+    projectSpaceViewPoint(
+        runnerHeadPoint()
+    );
+
+console.log('foot', foot);
+console.log('chest', chest);
+console.log('head', head);
 
     drawLine(
         foot,
