@@ -977,9 +977,10 @@ function drawFieldCameraDirection(){
     };
 
     const end = {
-        x:start.x + Math.cos(yaw) * 20,
-        y:start.y + Math.sin(yaw) * 20,
-        z:start.z
+    x:start.x,
+    y:start.y + 20,
+    z:start.z
+
     };
 
     drawLine(
