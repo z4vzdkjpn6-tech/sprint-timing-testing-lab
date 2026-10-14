@@ -430,13 +430,52 @@ function cameraDistanceToRunner(){
 
       // ====================================================
       // PROJECTION
-      //
-      // World Space
-      //     ↓
-      // Camera Space
-      //     ↓
-      // Screen Space
       // ====================================================  
+  
+// ----------------------------------------------------
+// SPACE VIEW PROJECTION
+// ----------------------------------------------------
+  
+function projectSpaceViewPoint(point){
+
+    const yaw =
+        state.spaceCamera.yaw *
+        Math.PI / 180;
+
+    const pitch =
+        state.spaceCamera.pitch *
+        Math.PI / 180;
+
+    const cy = Math.cos(yaw);
+    const sy = Math.sin(yaw);
+
+    const cp = Math.cos(pitch);
+    const sp = Math.sin(pitch);
+
+    let x = point.x;
+    let y = point.y;
+    let z = point.z;
+
+    // yaw
+
+    const x1 = x * cy - y * sy;
+    const y1 = x * sy + y * cy;
+
+    // pitch
+
+    const y2 = y1;
+    const z2 = z * cp - x1 * sp;
+    const x2 = z * sp + x1 * cp;
+
+    const scale = 3;
+
+    return p(
+        canvas.width / 2 + y2 * scale,
+        canvas.height / 2 - z2 * scale
+    );
+
+}
+  
   
 function projectWorldPoint(x,y,z){
 
@@ -789,11 +828,11 @@ function drawSpacePlaneYZ(){
         ){
 
             const screen =
-                projectPoint3D({
-                    x:20,
-                    y:y+yShift,
-                    z:z
-                });
+    projectSpaceViewPoint({
+        x:0,
+        y:y+yShift,
+        z:z
+    });
 
             if(!screen) continue;
 
@@ -808,7 +847,7 @@ function drawSpacePlaneYZ(){
     }
 
 const origin =
-    projectPoint3D({
+    projectSpaceViewPoint({
         x:0,
         y:yShift,
         z:0
@@ -825,7 +864,7 @@ if(origin){
 
 }
 }
-  
+
 function drawRunner(m){const side=mul(norm(p(-m.torsoAxis.y,m.torsoAxis.x)),m.h*.10),lineW=Math.max(3,m.h*.045);const hipLeft=add(m.pelvis,side),hipRight=sub(m.pelvis,side),shoulderLeft=add(m.shoulders,side),shoulderRight=sub(m.shoulders,side);const frontFoot=add(m.ground,mul(m.dir,m.h*.13)),backFoot=sub(m.ground,mul(m.dir,m.h*.10));const frontKnee=add(lerp(hipLeft,frontFoot,.54),mul(m.dir,m.h*.08)),backKnee=sub(lerp(hipRight,backFoot,.50),mul(m.dir,m.h*.07));const frontElbow=add(shoulderLeft,mul(m.dir,m.h*.18)),backElbow=sub(shoulderRight,mul(m.dir,m.h*.15));const frontWrist=add(frontElbow,add(mul(m.dir,m.h*.10),mul(m.screenUp,m.h*.12))),backWrist=add(backElbow,add(mul(m.dir,-m.h*.08),mul(m.screenUp,m.h*.12)));ctx.save();ctx.lineCap='round';ctx.lineJoin='round';drawLine(m.head,m.shoulders,'#203944',lineW);drawLine(m.shoulders,m.pelvis,'#203944',lineW);drawLine(shoulderLeft,frontElbow,'#203944',lineW);drawLine(frontElbow,frontWrist,'#203944',lineW);drawLine(shoulderRight,backElbow,'#203944',lineW);drawLine(backElbow,backWrist,'#203944',lineW);drawLine(hipLeft,frontKnee,'#203944',lineW);drawLine(frontKnee,frontFoot,'#203944',lineW);drawLine(hipRight,backKnee,'#203944',lineW);drawLine(backKnee,backFoot,'#203944',lineW);ctx.fillStyle='#e4b18a';ctx.beginPath();ctx.arc(m.head.x,m.head.y,m.h*.11,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 
@@ -907,6 +946,50 @@ if(state.spaceView){
 
   drawSpacePlaneYZ();
 
+function drawFieldCameraInSpace(){
+
+    const screen =
+        projectSpaceViewPoint({
+            x:state.camera.x,
+            y:state.camera.y,
+            z:state.camera.z
+        });
+
+    drawPoint(
+        screen,
+        '#ef4444',
+        5,
+        'CAM'
+    );
+
+}
+
+function drawFieldCameraDirection(){
+
+    const yaw =
+        state.camera.yaw *
+        Math.PI / 180;
+
+    const start = {
+        x:state.camera.x,
+        y:state.camera.y,
+        z:state.camera.z
+    };
+
+    const end = {
+        x:start.x + Math.cos(yaw) * 20,
+        y:start.y + Math.sin(yaw) * 20,
+        z:start.z
+    };
+
+    drawLine(
+        projectSpaceViewPoint(start),
+        projectSpaceViewPoint(end),
+        '#ef4444',
+        2
+    );
+
+}
   
 const o=p(
     canvas.width/2,
