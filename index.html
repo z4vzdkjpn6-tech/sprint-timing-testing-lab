@@ -894,14 +894,32 @@ function drawFieldCameraDirection(){
     };
 
     const yaw =
-        state.camera.yaw *
-        Math.PI / 180;
+    state.camera.yaw *
+    Math.PI / 180;
 
-    const end = {
-        x:start.x + 20*Math.cos(yaw),
-        y:start.y + 20*Math.sin(yaw),
-        z:start.z
-    };
+const pitch =
+    state.camera.pitch *
+    Math.PI / 180;
+
+const len = 20;
+
+const end = {
+
+    x:start.x +
+      len *
+      Math.cos(pitch) *
+      Math.cos(yaw),
+
+    y:start.y +
+      len *
+      Math.cos(pitch) *
+      Math.sin(yaw),
+
+    z:start.z +
+      len *
+      Math.sin(pitch)
+
+};
 
     const a =
         projectSpaceViewPoint(start);
