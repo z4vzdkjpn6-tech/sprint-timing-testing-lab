@@ -885,6 +885,46 @@ function drawFieldCameraInSpace(){
 
 }
 
+function drawFieldCameraDirection(){
+
+    const start = {
+        x:state.camera.x,
+        y:state.camera.y,
+        z:state.camera.z
+    };
+
+    const yaw =
+        state.camera.yaw *
+        Math.PI / 180;
+
+    const end = {
+        x:start.x + 20*Math.cos(yaw),
+        y:start.y + 20*Math.sin(yaw),
+        z:start.z
+    };
+
+    const a =
+        projectSpaceViewPoint(start);
+
+    const b =
+        projectSpaceViewPoint(end);
+
+    drawLine(
+        a,
+        b,
+        '#ff0000',
+        3
+    );
+
+    drawPoint(
+        b,
+        '#ff0000',
+        5,
+        ''
+    );
+
+}
+
 function drawRunner(m){const side=mul(norm(p(-m.torsoAxis.y,m.torsoAxis.x)),m.h*.10),lineW=Math.max(3,m.h*.045);const hipLeft=add(m.pelvis,side),hipRight=sub(m.pelvis,side),shoulderLeft=add(m.shoulders,side),shoulderRight=sub(m.shoulders,side);const frontFoot=add(m.ground,mul(m.dir,m.h*.13)),backFoot=sub(m.ground,mul(m.dir,m.h*.10));const frontKnee=add(lerp(hipLeft,frontFoot,.54),mul(m.dir,m.h*.08)),backKnee=sub(lerp(hipRight,backFoot,.50),mul(m.dir,m.h*.07));const frontElbow=add(shoulderLeft,mul(m.dir,m.h*.18)),backElbow=sub(shoulderRight,mul(m.dir,m.h*.15));const frontWrist=add(frontElbow,add(mul(m.dir,m.h*.10),mul(m.screenUp,m.h*.12))),backWrist=add(backElbow,add(mul(m.dir,-m.h*.08),mul(m.screenUp,m.h*.12)));ctx.save();ctx.lineCap='round';ctx.lineJoin='round';drawLine(m.head,m.shoulders,'#203944',lineW);drawLine(m.shoulders,m.pelvis,'#203944',lineW);drawLine(shoulderLeft,frontElbow,'#203944',lineW);drawLine(frontElbow,frontWrist,'#203944',lineW);drawLine(shoulderRight,backElbow,'#203944',lineW);drawLine(backElbow,backWrist,'#203944',lineW);drawLine(hipLeft,frontKnee,'#203944',lineW);drawLine(frontKnee,frontFoot,'#203944',lineW);drawLine(hipRight,backKnee,'#203944',lineW);drawLine(backKnee,backFoot,'#203944',lineW);ctx.fillStyle='#e4b18a';ctx.beginPath();ctx.arc(m.head.x,m.head.y,m.h*.11,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 
@@ -964,41 +1004,15 @@ drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective();
                   
 if(state.spaceView){
 
-  console.log('SPACE VIEW ACTIVE');
+    drawSpacePlaneYZ();
 
-  drawSpacePlaneYZ();
+    drawFieldCameraInSpace();
 
-  drawFieldCameraInSpace();
-
-}
-
-function drawFieldCameraDirection(){
-
-    const yaw =
-        state.camera.yaw *
-        Math.PI / 180;
-
-    const start = {
-        x:state.camera.x,
-        y:state.camera.y,
-        z:state.camera.z
-    };
-
-    const end = {
-    x:start.x,
-    y:start.y + 20,
-    z:start.z
-
-    };
-
-    drawLine(
-        projectSpaceViewPoint(start),
-        projectSpaceViewPoint(end),
-        '#ef4444',
-        2
-    );
+    drawFieldCameraDirection();
 
 }
+
+
   
 const o=p(
     canvas.width/2,
