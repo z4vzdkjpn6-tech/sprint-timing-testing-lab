@@ -865,6 +865,26 @@ if(origin){
 }
 }
 
+function drawFieldCameraInSpace(){
+
+    console.log('drawFieldCameraInSpace running');
+
+    const screen =
+        projectSpaceViewPoint({
+            x:state.camera.x,
+            y:state.camera.y,
+            z:state.camera.z
+        });
+
+    drawPoint(
+        screen,
+        '#ff0000',
+        10,
+        'SPACE CAM'
+    );
+
+}
+
 function drawRunner(m){const side=mul(norm(p(-m.torsoAxis.y,m.torsoAxis.x)),m.h*.10),lineW=Math.max(3,m.h*.045);const hipLeft=add(m.pelvis,side),hipRight=sub(m.pelvis,side),shoulderLeft=add(m.shoulders,side),shoulderRight=sub(m.shoulders,side);const frontFoot=add(m.ground,mul(m.dir,m.h*.13)),backFoot=sub(m.ground,mul(m.dir,m.h*.10));const frontKnee=add(lerp(hipLeft,frontFoot,.54),mul(m.dir,m.h*.08)),backKnee=sub(lerp(hipRight,backFoot,.50),mul(m.dir,m.h*.07));const frontElbow=add(shoulderLeft,mul(m.dir,m.h*.18)),backElbow=sub(shoulderRight,mul(m.dir,m.h*.15));const frontWrist=add(frontElbow,add(mul(m.dir,m.h*.10),mul(m.screenUp,m.h*.12))),backWrist=add(backElbow,add(mul(m.dir,-m.h*.08),mul(m.screenUp,m.h*.12)));ctx.save();ctx.lineCap='round';ctx.lineJoin='round';drawLine(m.head,m.shoulders,'#203944',lineW);drawLine(m.shoulders,m.pelvis,'#203944',lineW);drawLine(shoulderLeft,frontElbow,'#203944',lineW);drawLine(frontElbow,frontWrist,'#203944',lineW);drawLine(shoulderRight,backElbow,'#203944',lineW);drawLine(backElbow,backWrist,'#203944',lineW);drawLine(hipLeft,frontKnee,'#203944',lineW);drawLine(frontKnee,frontFoot,'#203944',lineW);drawLine(hipRight,backKnee,'#203944',lineW);drawLine(backKnee,backFoot,'#203944',lineW);ctx.fillStyle='#e4b18a';ctx.beginPath();ctx.arc(m.head.x,m.head.y,m.h*.11,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 
@@ -948,25 +968,7 @@ if(state.spaceView){
 
   drawSpacePlaneYZ();
 
-function drawFieldCameraInSpace(){
-
-  console.log('drawFieldCameraInSpace running');
-  
-    const screen =
-        projectSpaceViewPoint({
-            x:state.camera.x,
-            y:state.camera.y,
-            z:state.camera.z
-        });
-
-  console.log('SPACE CAM', screen);
-
-    drawPoint(
-    screen,
-    '#ff0000',
-    15,
-    'SPACE CAM'
-);
+  drawFieldCameraInSpace();
 
 }
 
