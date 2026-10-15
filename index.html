@@ -459,6 +459,82 @@ function cameraDistanceToRunner(){
     );
 
 }
+  
+function spaceWorldToCamera(point){
+
+    const cam = state.spaceCamera;
+
+    const yaw =
+        cam.yaw * Math.PI / 180;
+
+    const pitch =
+        cam.pitch * Math.PI / 180;
+
+    // Camera position from orbit
+
+    const cx =
+        cam.distance *
+        Math.cos(pitch) *
+        Math.cos(yaw);
+
+    const cy =
+        cam.distance *
+        Math.cos(pitch) *
+        Math.sin(yaw);
+
+    const cz =
+        cam.distance *
+        Math.sin(pitch);
+
+    // Translate
+
+    let x = point.x - cx;
+    let y = point.y - cy;
+    let z = point.z - cz;
+
+    // Rotate by inverse yaw
+
+    const cyaw = Math.cos(-yaw);
+    const syaw = Math.sin(-yaw);
+
+    let x1 = x * cyaw - y * syaw;
+    let y1 = x * syaw + y * cyaw;
+
+    // Rotate by inverse pitch
+
+    const cp = Math.cos(-pitch);
+    const sp = Math.sin(-pitch);
+
+    let x2 = x1 * cp + z * sp;
+    let z2 = -x1 * sp + z * cp;
+
+    return {
+        x:x2,
+        y:y1,
+        z:z2
+    };
+
+}
+
+function spaceCameraToScreen(point){
+
+    const focal = 600;
+
+    if(point.x <= 1)
+        return null;
+
+    const scale =
+        focal / point.x;
+
+    return p(
+        canvas.width/2 +
+        point.y * scale,
+
+        canvas.height/2 -
+        point.z * scale
+    );
+
+}
 
 
       // ====================================================
@@ -471,70 +547,8 @@ function cameraDistanceToRunner(){
   
 function projectSpaceViewPoint(point){
 
-    const yaw =
-        state.spaceCamera.yaw *
-        Math.PI/180;
-
-    const pitch =
-        state.spaceCamera.pitch *
-        Math.PI/180;
-
-    const distance =
-        state.spaceCamera.distance;
-
-    // orbit camera position
-
-    const camX =
-        distance *
-        Math.cos(pitch) *
-        Math.cos(yaw);
-
-    const camY =
-        distance *
-        Math.cos(pitch) *
-        Math.sin(yaw);
-
-    const camZ =
-        distance *
-        Math.sin(pitch);
-
-    // move world relative to camera
-
-    let x = point.x - camX;
-    let y = point.y - camY;
-    let z = point.z - camZ;
-
-    // undo camera yaw
-
-    const cy = Math.cos(-yaw);
-    const sy = Math.sin(-yaw);
-
-    const x1 = x*cy - y*sy;
-    const y1 = x*sy + y*cy;
-
-    // undo camera pitch
-
-    const cp = Math.cos(-pitch);
-    const sp = Math.sin(-pitch);
-
-    const x2 = x1*cp + z*sp;
-    const z2 = -x1*sp + z*cp;
-
-    // perspective
-
-    const focal = 600;
-
-    const depth = x2 + distance;
-
-    if(depth < 1)
-        return null;
-
-    const scale =
-        focal / depth;
-
-    return p(
-        canvas.width/2 + y1*scale,
-        canvas.height/2 - z2*scale
+    return spaceCameraToScreen(
+        spaceWorldToCamera(point)
     );
 
 }
