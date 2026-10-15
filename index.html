@@ -371,8 +371,8 @@ function cameraPoint(){
       // Camera Space
       // ====================================================  
   
-function ToCamera(point){
-
+function worldToCamera(point){
+  
     const cam=cameraPoint();
 
     let x=point.x-cam.x;
@@ -460,7 +460,7 @@ function cameraDistanceToRunner(){
 
 }
   
-function spaceToCamera(point){
+function spaceWorldToCamera(point){
 
     const cam = state.spaceCamera;
 
@@ -548,7 +548,7 @@ function spaceCameraToScreen(point){
 function projectSpaceViewPoint(point){
 
     return spaceCameraToScreen(
-        spaceToCamera(point)
+        spaceWorldToCamera(point)
     );
 
 }
