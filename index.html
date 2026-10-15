@@ -107,6 +107,39 @@
         value="0">
     <span id="spacePlaneYV">0</span>
 </label>  
+
+<label>
+    Space Yaw
+    <input
+        id="spaceYaw"
+        type="range"
+        min="-180"
+        max="180"
+        value="45">
+    <span id="spaceYawV">45°</span>
+</label>
+
+<label>
+    Space Pitch
+    <input
+        id="spacePitch"
+        type="range"
+        min="-89"
+        max="89"
+        value="-25">
+    <span id="spacePitchV">-25°</span>
+</label>
+
+<label>
+    Space Distance
+    <input
+        id="spaceDistance"
+        type="range"
+        min="20"
+        max="300"
+        value="150">
+    <span id="spaceDistanceV">150</span>
+</label>
   
 <div class="card"><h2>Simulation</h2><label class="control">Simulation speed <input id="simSpeed" type="range" min="0.25" max="4" step="0.25"><span id="simSpeedV" class="value"></span></label><label class="control">Frame rate <select id="fps"><option value="24">24 fps</option><option value="30" selected>30 fps</option><option value="60">60 fps</option></select></label><label class="control">Track length <input id="corridorLength" type="range" min="10" max="150" step="1"><span id="corridorLengthV" class="value"></span></label><label class="control">Corridor position <input id="manualPosition" type="range" min="-0.35" max="1.35" step="0.01"><span id="manualPositionV" class="value"></span></label><div class="readout"><div><b>Simulation time</b><span id="timeV"></span></div><div><b>Frame</b><span id="frameV"></span></div><div><b>Corridor position</b><span id="progressV"></span></div><div><b>Apparent height</b><span id="heightV"></span></div></div></div>
 <div class="card"><h2>Runner</h2><label class="control">Speed <input id="runnerSpeed" type="range" min="3" max="13" step="0.1"><span id="runnerSpeedV" class="value"></span></label><label class="control">Sprinter Height <input id="height" type="range"
@@ -440,38 +473,68 @@ function projectSpaceViewPoint(point){
 
     const yaw =
         state.spaceCamera.yaw *
-        Math.PI / 180;
+        Math.PI/180;
 
     const pitch =
         state.spaceCamera.pitch *
-        Math.PI / 180;
+        Math.PI/180;
 
-    const cy = Math.cos(yaw);
-    const sy = Math.sin(yaw);
+    const distance =
+        state.spaceCamera.distance;
 
-    const cp = Math.cos(pitch);
-    const sp = Math.sin(pitch);
+    // orbit camera position
 
-    let x = point.x;
-    let y = point.y;
-    let z = point.z;
+    const camX =
+        distance *
+        Math.cos(pitch) *
+        Math.cos(yaw);
 
-    // yaw
+    const camY =
+        distance *
+        Math.cos(pitch) *
+        Math.sin(yaw);
 
-    const x1 = x * cy - y * sy;
-    const y1 = x * sy + y * cy;
+    const camZ =
+        distance *
+        Math.sin(pitch);
 
-    // pitch
+    // move world relative to camera
 
-    const y2 = y1;
-    const z2 = z * cp - x1 * sp;
-    const x2 = z * sp + x1 * cp;
+    let x = point.x - camX;
+    let y = point.y - camY;
+    let z = point.z - camZ;
 
-    const scale = 3;
+    // undo camera yaw
+
+    const cy = Math.cos(-yaw);
+    const sy = Math.sin(-yaw);
+
+    const x1 = x*cy - y*sy;
+    const y1 = x*sy + y*cy;
+
+    // undo camera pitch
+
+    const cp = Math.cos(-pitch);
+    const sp = Math.sin(-pitch);
+
+    const x2 = x1*cp + z*sp;
+    const z2 = -x1*sp + z*cp;
+
+    // perspective
+
+    const focal = 600;
+
+    const depth = x2 + distance;
+
+    if(depth < 1)
+        return null;
+
+    const scale =
+        focal / depth;
 
     return p(
-        canvas.width / 2 + y2 * scale,
-        canvas.height / 2 - z2 * scale
+        canvas.width/2 + y1*scale,
+        canvas.height/2 - z2*scale
     );
 
 }
@@ -1571,7 +1634,51 @@ $('yaw').addEventListener('input',e=>{
 
     }
 );
+      $('spaceYaw').addEventListener(
+    'input',
+    e=>{
 
+        state.spaceCamera.yaw =
+            +e.target.value;
+
+        $('spaceYawV').textContent =
+            state.spaceCamera.yaw + '°';
+
+        render();
+
+    }
+);
+
+$('spacePitch').addEventListener(
+    'input',
+    e=>{
+
+        state.spaceCamera.pitch =
+            +e.target.value;
+
+        $('spacePitchV').textContent =
+            state.spaceCamera.pitch + '°';
+
+        render();
+
+    }
+);
+
+$('spaceDistance').addEventListener(
+    'input',
+    e=>{
+
+        state.spaceCamera.distance =
+            +e.target.value;
+
+        $('spaceDistanceV').textContent =
+            state.spaceCamera.distance;
+
+        render();
+
+    }
+);
+  
   
   // ----------------------------------------------------
   // Action Buttons
