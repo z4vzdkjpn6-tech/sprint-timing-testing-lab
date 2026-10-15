@@ -218,7 +218,8 @@ spaceCamera:{
 },
              
 spaceView:true,          
-
+planViewScale:5,
+             
 sim:{fps:30,multiplier:1,time:0,frame:0,playing:false,accum:0,corridorLength:100,corridorWidth:3},overlays:Object.fromEntries(overlayDefs.map(([k])=>[k,true])),results:{start:null,finish:null},samples:[],drag:null,reportUrl:null,scrub:false,lastScrub:null};
 
 ///////////////////////////////////
@@ -614,15 +615,16 @@ function distance3(a,b){
   
   function worldToPlanView(point){
 
-    const scale = 5;
+    const scale =
+        state.planViewScale;
 
     return p(
 
         canvas.width/2 +
-        point.x * scale,
+            point.x * scale,
 
         canvas.height/2 -
-        point.y * scale
+            point.y * scale
 
     );
 
@@ -1105,8 +1107,9 @@ function drawCameraPlanView(){
 function drawCameraDirectionPlanView(){
 
     const yaw =
-        state.camera.yaw *
-        Math.PI/180;
+        degToRad(
+            state.camera.yaw
+        );
 
     const start = {
         x:state.camera.x,
@@ -1115,10 +1118,10 @@ function drawCameraDirectionPlanView(){
 
     const end = {
         x:start.x +
-            Math.cos(yaw)*20,
+            20*Math.cos(yaw),
 
         y:start.y +
-            Math.sin(yaw)*20
+            20*Math.sin(yaw)
     };
 
     drawLine(
@@ -1129,6 +1132,7 @@ function drawCameraDirectionPlanView(){
     );
 
 }
+
 
 function drawRunnerPlanView(){
 
