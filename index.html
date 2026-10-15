@@ -366,12 +366,12 @@ function cameraPoint(){
       // ====================================================
       // CAMERA
       //
-      // World Space
+      //  Space
       //     ↓
       // Camera Space
       // ====================================================  
   
-function worldToCamera(point){
+function ToCamera(point){
 
     const cam=cameraPoint();
 
@@ -460,7 +460,7 @@ function cameraDistanceToRunner(){
 
 }
   
-function spaceWorldToCamera(point){
+function spaceToCamera(point){
 
     const cam = state.spaceCamera;
 
@@ -548,7 +548,7 @@ function spaceCameraToScreen(point){
 function projectSpaceViewPoint(point){
 
     return spaceCameraToScreen(
-        spaceWorldToCamera(point)
+        spaceToCamera(point)
     );
 
 }
@@ -607,8 +607,26 @@ function distance3(a,b){
     return Math.hypot(dx,dy,dz);
 
 }
-       
 
+//          //
+// Top-view //
+//          //
+  
+  function worldToPlanView(point){
+
+    const scale = 5;
+
+    return p(
+
+        canvas.width/2 +
+        point.x * scale,
+
+        canvas.height/2 -
+        point.y * scale
+
+    );
+
+}
 
   
   
@@ -1020,6 +1038,117 @@ const end = {
 
 }
 
+//          //
+// Top-view //
+//          //
+  
+  function drawPlanAxes(){
+
+    const o =
+        worldToPlanView({
+            x:0,
+            y:0
+        });
+
+    const x =
+        worldToPlanView({
+            x:20,
+            y:0
+        });
+
+    const y =
+        worldToPlanView({
+            x:0,
+            y:20
+        });
+
+    drawLine(
+        o,
+        x,
+        '#ef4444',
+        3
+    );
+
+    drawLine(
+        o,
+        y,
+        '#22c55e',
+        3
+    );
+
+    drawPoint(
+        o,
+        '#3b82f6',
+        6,
+        'O'
+    );
+
+}
+
+function drawCameraPlanView(){
+
+    const cam =
+        worldToPlanView({
+            x:state.camera.x,
+            y:state.camera.y
+        });
+
+    drawPoint(
+        cam,
+        '#ff0000',
+        8,
+        'CAM'
+    );
+
+}
+
+function drawCameraDirectionPlanView(){
+
+    const yaw =
+        state.camera.yaw *
+        Math.PI/180;
+
+    const start = {
+        x:state.camera.x,
+        y:state.camera.y
+    };
+
+    const end = {
+        x:start.x +
+            Math.cos(yaw)*20,
+
+        y:start.y +
+            Math.sin(yaw)*20
+    };
+
+    drawLine(
+        worldToPlanView(start),
+        worldToPlanView(end),
+        '#ff0000',
+        2
+    );
+
+}
+
+function drawRunnerPlanView(){
+
+    const foot =
+        runnerFootPoint();
+
+    drawPoint(
+
+        worldToPlanView({
+            x:foot.x,
+            y:foot.y
+        }),
+
+        '#22c55e',
+        8,
+        'RUNNER'
+    );
+
+}
+  
 function drawRunner(m){const side=mul(norm(p(-m.torsoAxis.y,m.torsoAxis.x)),m.h*.10),lineW=Math.max(3,m.h*.045);const hipLeft=add(m.pelvis,side),hipRight=sub(m.pelvis,side),shoulderLeft=add(m.shoulders,side),shoulderRight=sub(m.shoulders,side);const frontFoot=add(m.ground,mul(m.dir,m.h*.13)),backFoot=sub(m.ground,mul(m.dir,m.h*.10));const frontKnee=add(lerp(hipLeft,frontFoot,.54),mul(m.dir,m.h*.08)),backKnee=sub(lerp(hipRight,backFoot,.50),mul(m.dir,m.h*.07));const frontElbow=add(shoulderLeft,mul(m.dir,m.h*.18)),backElbow=sub(shoulderRight,mul(m.dir,m.h*.15));const frontWrist=add(frontElbow,add(mul(m.dir,m.h*.10),mul(m.screenUp,m.h*.12))),backWrist=add(backElbow,add(mul(m.dir,-m.h*.08),mul(m.screenUp,m.h*.12)));ctx.save();ctx.lineCap='round';ctx.lineJoin='round';drawLine(m.head,m.shoulders,'#203944',lineW);drawLine(m.shoulders,m.pelvis,'#203944',lineW);drawLine(shoulderLeft,frontElbow,'#203944',lineW);drawLine(frontElbow,frontWrist,'#203944',lineW);drawLine(shoulderRight,backElbow,'#203944',lineW);drawLine(backElbow,backWrist,'#203944',lineW);drawLine(hipLeft,frontKnee,'#203944',lineW);drawLine(frontKnee,frontFoot,'#203944',lineW);drawLine(hipRight,backKnee,'#203944',lineW);drawLine(backKnee,backFoot,'#203944',lineW);ctx.fillStyle='#e4b18a';ctx.beginPath();ctx.arc(m.head.x,m.head.y,m.h*.11,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 function drawRunnerInSpace(){
@@ -1159,13 +1288,14 @@ drawPoint(mid,'#ff9900',8,'MID');updateReadouts(m);updatePerspective();
                   
 if(state.spaceView){
 
-    drawSpacePlaneYZ();
+    drawPlanAxes();
 
-    drawFieldCameraInSpace();
-    drawFieldCameraDirection();
+drawCameraPlanView();
 
-    drawRunnerInSpace();
+drawCameraDirectionPlanView();
 
+drawRunnerPlanView();
+  
 }
 
 
